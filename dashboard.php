@@ -85,6 +85,11 @@
         }
     }
 
+    // Add 700 to January 2026 (current year)
+    if ($currentYear == 2026) {
+        $sales_cy[0] += 700;   // January index = 0
+    }
+
     $stmt_2= $pdo->prepare("
         SELECT
             rtt.NAME AS METHOD,
@@ -339,6 +344,12 @@
                 }
             },
             scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                },
                 y: {
                     beginAtZero: true,
                     ticks: {
@@ -397,6 +408,12 @@
                 }
             },
             scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                },
                 y: {
                     beginAtZero: true
                 }
@@ -509,6 +526,12 @@
                 }
             },
             scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                },
                 y: {
                     beginAtZero: true,
                     ticks: {
