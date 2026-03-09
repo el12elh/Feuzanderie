@@ -154,7 +154,7 @@
     // GET best customers
     $stmt_3= $pdo->prepare("
     SELECT 
-        sub.CUSTOMER,
+        CONCAT(ROW_NUMBER() OVER (ORDER BY (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) DESC), ' - ', sub.CUSTOMER) AS CUSTOMER,
         (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) AS NET_VALUE
     FROM (
         SELECT 
@@ -179,7 +179,7 @@
         GROUP BY ID_CUSTOMER
     ) ref ON sub.ID_CUSTOMER = ref.ID_CUSTOMER
     ORDER BY NET_VALUE DESC
-    LIMIT 10
+    LIMIT 20
     ");
 
     $stmt_3->execute();
@@ -476,7 +476,7 @@
             plugins: {
                 title: {
                     display: true,
-                    text: 'Top 10 Members – CY'
+                    text: 'Top 20 Members – CY'
                 },
                 tooltip: {
                     callbacks: {
