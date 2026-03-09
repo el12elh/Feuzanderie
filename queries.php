@@ -1,7 +1,7 @@
 <?php
     // Fetch products
     $all_prods = $pdo
-        ->query("SELECT * FROM ref_product ORDER BY IS_ACTIVE DESC, ID_PRODUCT")
+        ->query("SELECT * FROM ref_product ORDER BY IS_ACTIVE, ID_PRODUCT")
         ->fetchAll();
 
     // GET only below

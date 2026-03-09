@@ -98,6 +98,7 @@
                         include 'amikale.php';
                         include 'products.php';
                         include 'members.php';
+                        include 'member.php';
                         include 'admin.php';    
                         include 'dashboard.php';
                     endif;

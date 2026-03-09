@@ -53,7 +53,7 @@
                             <input type="hidden" name="id_product" value="<?= $p['ID_PRODUCT'] ?>">
                             <input type="hidden" name="set_active" value="0">
                             <button type="submit" name="toggle_prod" 
-                                    class="icon solid fa-eye"
+                                    class="icon solid fa-eye-slash"
                                     title="Hide Product"
                                     style="background:none; box-shadow:none; border:0; cursor:pointer;font-size: 1.2rem;">
                                 <span class="label">Hide</span>
@@ -64,7 +64,7 @@
                             <input type="hidden" name="id_product" value="<?= $p['ID_PRODUCT'] ?>">
                             <input type="hidden" name="set_active" value="1">
                             <button type="submit" name="toggle_prod" 
-                                    class="icon solid fa-eye-slash"
+                                    class="icon solid fa-eye"
                                     title="Show Product"
                                     style="background:none; box-shadow:none; border:0; cursor:pointer;font-size: 1.2rem;">
                                 <span class="label">Show</span>
