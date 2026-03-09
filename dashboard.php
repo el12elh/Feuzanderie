@@ -107,7 +107,7 @@
         ) AS last_seven ON DATE(wt.CREATED_AT) = last_seven.active_date
         WHERE wt.ID_TOPUP_TYPE IN (2,3,6)
         GROUP BY DATE(wt.CREATED_AT), rtt.NAME
-        ORDER BY wt.ID_TOPUP_TYPE, DATE(wt.CREATED_AT)
+        ORDER BY DATE(wt.CREATED_AT), wt.ID_TOPUP_TYPE
     ");
 
     $stmt_2->execute();
@@ -443,7 +443,12 @@
                 }
             },
             scales: {
-                x: { stacked: true },
+                x: { stacked: true,
+                    ticks: {
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                    },
                 y: { 
                     stacked: true,
                     beginAtZero: true,
