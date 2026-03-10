@@ -154,12 +154,12 @@
     // GET best customers
     $stmt_3= $pdo->prepare("
     SELECT 
-        CONCAT(ROW_NUMBER() OVER (ORDER BY (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) DESC), ' - ', sub.CUSTOMER) AS CUSTOMER,
+        CONCAT(ROW_NUMBER() OVER (ORDER BY (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) DESC), '- ', sub.CUSTOMER) AS CUSTOMER,
         (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) AS NET_VALUE
     FROM (
         SELECT 
             c.ID_CUSTOMER,
-            CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+            CONCAT(LEFT(c.FIRST_NAME,1), '. ', c.LAST_NAME) AS CUSTOMER,
             SUM(p.PRICE * tr.QUANTITY) AS TOTAL_ORDER_VALUE
         FROM transactions tr
         JOIN customers c ON tr.ID_CUSTOMER = c.ID_CUSTOMER
@@ -211,13 +211,13 @@
 
 <article id="dashboard">
     <h2 class="major">Dashboard</h2>
+    <canvas id="revenueChart" height="300"></canvas>
+    <hr />
     <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
         <div style="width: 300px; height: 300px;">
             <canvas id="topupDonut"></canvas>
         </div>
     </div>
-    <hr />
-    <canvas id="revenueChart" height="300"></canvas>
     <hr />
     <canvas id="lossChart" height="300"></canvas>
     <hr />
@@ -225,7 +225,7 @@
     <hr />
     <canvas id="CustChart" height="300"></canvas>
     <hr />
-    <canvas id="topCustomersChart" height="300"></canvas>
+    <canvas id="topCustomersChart" height="600"></canvas>
     
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -493,8 +493,8 @@
         }
     });
 
-    const ctx4 = document.getElementById('lossChart').getContext('2d');
-    new Chart(ctx4, {
+    const ctx5 = document.getElementById('lossChart').getContext('2d');
+    new Chart(ctx5, {
         type: 'line',
         data: {
             labels: <?= json_encode($labels) ?>,
