@@ -213,12 +213,13 @@
     <h2 class="major">Dashboard</h2>
     <canvas id="revenueChart" height="300"></canvas>
     <hr />
+    <!-- 
     <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
         <div style="width: 300px; height: 300px;">
             <canvas id="topupDonut"></canvas>
         </div>
     </div>
-    <hr />
+    <hr /> -->
     <canvas id="lossChart" height="300"></canvas>
     <hr />
     <canvas id="salesChart" height="300"></canvas>
@@ -229,7 +230,7 @@
     
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-
+    /*
     const ctx = document.getElementById('topupDonut').getContext('2d');
     const centerTextPlugin = {
         id: 'centerText',
@@ -295,7 +296,7 @@
         },
         plugins: [centerTextPlugin]
     });
-    
+    */
     const ctx1 = document.getElementById('salesChart').getContext('2d');
     new Chart(ctx1, {
         type: 'line',
