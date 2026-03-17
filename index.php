@@ -72,6 +72,7 @@
                                 <li><a href="#products"><strong>Products</strong></a></li>
                                 <li><a href="#members"><strong>Members</strong></a></li>
                                 <li><a href="#admin"><strong>Admin</strong></a></li>
+                                <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
                                 <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
                             <?php else: ?>
                                 <li><a href="#contact"><strong>Contact</strong></a></li>
@@ -99,7 +100,8 @@
                         include 'products.php';
                         include 'members.php';
                         include 'member.php';
-                        include 'admin.php';    
+                        include 'admin.php';
+                        include 'cashflow.php';   
                         include 'dashboard.php';
                     endif;
 
