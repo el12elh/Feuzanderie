@@ -1,6 +1,4 @@
 <?php
-    include 'security.php';
-
     $stmt_0= $pdo->prepare("
         SELECT
             rtt.NAME AS METHOD,
@@ -27,7 +25,7 @@
                 SUM(total) AS total_sales
             FROM transactions
             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
-            AND id_customer != 1 AND id_product NOT IN (7,9)
+            AND id_customer != 1
             GROUP BY YEAR(created_at), MONTH(created_at)
         ),
         refunds AS (
@@ -218,14 +216,7 @@
         FROM purchases p)
     ) AS total_cash")->fetchColumn() ?: 0;
 
-    $base_target = 6000;
-    if ($total_cash < $base_target) {
-        $target = $base_target;
-    } else {
-        // dynamic target: round up to nearest 1000 + 500
-        $target = (floor($total_cash / 1000) * 1000) + 500;
-    }
-
+    $target = 8000;
     $current_val = $total_cash;
     $remaining = $target - $total_cash;
 
@@ -340,8 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     callbacks: {
                         label: function() {
                             return [
-                                ' Balance: ' + totalCash.toLocaleString() + '€',
-                                ' Target: ' + targetGoal.toLocaleString() + '€'
+                                ' Balance: ' + totalCash + '€',
+                                ' Target: ' + targetGoal + '€'
                             ];
                         }
                     }
