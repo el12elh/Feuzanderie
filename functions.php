@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (EMAIL, PASSWORD, IS_ADMIN, CREATED_AT) 
-                                       VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))");
+                $stmt = $pdo->prepare("INSERT INTO users (EMAIL, PASSWORD, IS_ADMIN) 
+                                       VALUES (?, ?, ?)");
                 $stmt->execute([$email, $hashed_pass, $isAdmin]);
                 $_SESSION['toast'] = [
                     'type' => 'success',
@@ -290,8 +290,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Insert transaction
             $stmt1 = $pdo->prepare("
                 INSERT INTO transactions 
-                (ID_USER, ID_CUSTOMER, ID_PRODUCT, QUANTITY, TOTAL, CREATED_AT) 
-                VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))
+                (ID_USER, ID_CUSTOMER, ID_PRODUCT, QUANTITY, TOTAL) 
+                VALUES (?, ?, ?, ?, ?)
             ");
             $stmt1->execute([
                 $current_admin_id,
@@ -306,8 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $id_type = ($id_customer == 2) ? 3 : 2;
                 $stmt2 = $pdo->prepare("
                     INSERT INTO wallet_topup 
-                    (ID_USER, ID_CUSTOMER, ID_TOPUP_TYPE, AMOUNT, CREATED_AT)
-                    VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))
+                    (ID_USER, ID_CUSTOMER, ID_TOPUP_TYPE, AMOUNT)
+                    VALUES (?, ?, ?, ?)
                 ");
                 $stmt2->execute([
                     $current_admin_id,
@@ -358,8 +358,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_type = (int)$_POST['id_type'];
             $amount = (float)$_POST['amount'];
             $pdo->beginTransaction();
-            $stmt1 = $pdo->prepare("INSERT INTO wallet_topup (ID_USER, ID_CUSTOMER, ID_TOPUP_TYPE, AMOUNT, CREATED_AT)
-                                    VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))");
+            $stmt1 = $pdo->prepare("INSERT INTO wallet_topup (ID_USER, ID_CUSTOMER, ID_TOPUP_TYPE, AMOUNT)
+                                    VALUES (?, ?, ?, ?)");
             $stmt1->execute([$current_admin_id, $id_customer, $id_type, $amount]);
             $stmt2 = $pdo->prepare("UPDATE customers SET BALANCE = BALANCE + ?, IS_ACTIVE = 1 WHERE ID_CUSTOMER = ?");
             $stmt2->execute([$amount, $id_customer]);
@@ -384,6 +384,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    if (isset($_POST['do_purchase'])) {
+        $upload_dir = 'receipts/';
+        // 1. Check if the token exists and matches
+        if (isset($_POST['token']) && $_POST['token'] === $_SESSION['submit_token']) {
+
+            $id_user = $_SESSION['user_id']; // Or however you trackthe logged-in user 
+            $comment = htmlspecialchars($_POST['comment']);
+            $amount  = (float)$_POST['amount'];
+            $receipt_path = null;
+
+            // --- FILE UPLOAD LOGIC ---
+            if (isset($_FILES['receipt']) && $_FILES['receipt']['error'] === UPLOAD_ERR_OK) {
+                
+                $file_tmp_path = $_FILES['receipt']['tmp_name'];
+                $file_name = $_FILES['receipt']['name'];
+                $file_size = $_FILES['receipt']['size'];
+                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+                // Limit size to 5MB
+                if ($file_size <= 5000000) {
+                    // Generate a unique name: receipt_USERID_TIMESTAMP.ext
+                    $new_file_name = "receipt_" . $id_user . "_" . time() . "." . $file_ext;
+                    $dest_path = $upload_dir . $new_file_name;
+
+                    if (move_uploaded_file($file_tmp_path, $dest_path)) {
+                        $receipt_path = $dest_path;
+                    }
+                } else {
+                    $_SESSION['toast'] = [
+                        'type' => 'error',
+                        'message' => 'File is too large (max 5MB)'
+                    ];
+                    unset($_SESSION['submit_token']);
+                    header("Location: " . $_SERVER['REQUEST_URI']);
+                    exit();
+                } 
+            }
+
+            // --- DATABASE INSERT ---
+            $sql = "INSERT INTO purchases (ID_USER, COMMENT, AMOUNT, RECEIPT_PATH) 
+                    VALUES (:id_user, :comment, :amount, :receipt_path)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                'id_user'      => $id_user,
+                'comment'      => $comment,
+                'amount'       => $amount,
+                'receipt_path' => $receipt_path
+            ]);
+            
+            $_SESSION['toast'] = [
+                'type' => 'success',
+                'message' => 'Purchase recorded successfully'
+            ];
+            unset($_SESSION['submit_token']);
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit();
+        }
+    }
+    
     // Contact Form Logic
     if (isset($_POST['contact_submit'])) {
         // 1. Sanitize inputs

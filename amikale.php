@@ -53,7 +53,7 @@
     </section>
 
     <!-- =================== Top-Up Wallet =================== -->
-    <section id="topup-wallet">  
+    <section id="topup-wallet">
         <form method="post">
             <div class="fields">
                 <div class="field">
@@ -94,7 +94,35 @@
         </form>
     </section> 
     
+    <!-- =================== Purchase =================== -->
+    <section id="purchase">
+        <form method="post" enctype="multipart/form-data">
+            <div class="fields">
+                <div class="field">
+                    <input type="text" name="comment" maxlength="100" placeholder="Stock, Resto, Bar, etc." required />
+                </div>
+                
+                <div class="field">
+                    <input type="number" name="amount" step="0.01" placeholder="Amount (€)" min="1" required />
+                </div>
+
+                <div class="field">
+                    <label for="receipt">Attach Receipt</label>
+                    <input type="file" name="receipt" id="receipt" accept="image/*,.pdf" />
+                </div>
+
+                <input type="hidden" name="token" value="<?= $_SESSION['submit_token']; ?>">
+                
+                <div class="field">
+                    <button type="submit" name="do_purchase" class="primary fit">
+                        <i class="fa fa-receipt"></i> Purchase
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
     <hr />
+    
     <!-- =================== Latest Transactions =================== -->
     <section id="latest-transactions">                     
         <h3>Latest Transactions</h3>
@@ -110,7 +138,7 @@
                 </thead>
                 <tbody>
                 <?php
-                foreach ($transaction as $tr):
+                foreach ($transactions as $tr):
                     $color = $tr['AMOUNT'] > 0 ? 'rgb(125,227,211)' : 'rgb(255, 99, 132)';
                     $sign = $tr['AMOUNT'] > 0 ? '+' : '';
                 ?>
