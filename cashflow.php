@@ -1,17 +1,8 @@
 <?php
-    include 'security.php';
-
-    // 1. Définir le nombre d'éléments par page
     $limit = 20;
-
-    // 2. Récupérer le numéro de la page actuelle (par défaut 1)
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     if ($page < 1) $page = 1;
-
-    // 3. Calculer le décalage (OFFSET)
     $offset = ($page - 1) * $limit;
-
-    // 4. Récupérer le nombre total de lignes (pour savoir quand s'arrêter)
     $total_rows = $pdo->query("SELECT (
         (SELECT COUNT(*) FROM wallet_topup WHERE ID_TOPUP_TYPE IN (2, 3, 6)) 
         + 
@@ -19,7 +10,6 @@
     ) AS total_transactions")->fetchColumn();
     $total_pages = ceil($total_rows / $limit);
 
-    // 5. Ta requête SQL avec LIMIT et OFFSET
     $sql = "SELECT
         CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
         t.AMOUNT AS AMOUNT,
@@ -85,7 +75,7 @@
                     </td>
                     <td style="vertical-align: middle;">
                         <span style="color:<?= $color ?>; font-weight:bold;">
-                            <?= $sign . number_format($tr['AMOUNT'], 0, ',', ' '); ?>€
+                            <?= $sign . number_format($tr['AMOUNT'], 0, ',', ''); ?>€
                         </span>
                         <br><?= $tr['LABEL'] ?>
                     </td>
