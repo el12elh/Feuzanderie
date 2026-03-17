@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `ref_topup_type` (
 INSERT INTO `ref_topup_type` (`NAME`) VALUES
     ('Initial'),
     ('Cash'),
-    ('Card'),
+    ('SumUp'),
     ('Refund'),
     ('Bank Transfer');
 
@@ -117,3 +117,78 @@ CREATE TABLE IF NOT EXISTS `wallet_topup` (
         FOREIGN KEY (`ID_TOPUP_TYPE`) REFERENCES `ref_topup_type`(`ID_TOPUP_TYPE`)
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `purchases` (
+    `PURCHASE_ID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `ID_USER` INT UNSIGNED NOT NULL,
+    `COMMENT` VARCHAR(100) DEFAULT NULL,
+    `AMOUNT` DECIMAL(12, 2) NOT NULL,
+    `RECEIPT_PATH` VARCHAR(255) DEFAULT NULL,
+    `CREATED_AT` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`PURCHASE_ID`),
+    KEY `IDX_PURCHASES_USER` (`ID_USER`),
+    CONSTRAINT `FK_PURCHASES_USER`
+        FOREIGN KEY (`ID_USER`) REFERENCES `users`(`ID_USER`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE OR REPLACE VIEW v_master_transactions AS
+    SELECT
+        CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+        t.AMOUNT AS AMOUNT,
+        r.NAME AS LABEL,
+        t.CREATED_AT,
+        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+    FROM wallet_topup t
+    JOIN customers c ON t.ID_CUSTOMER = c.ID_CUSTOMER
+    LEFT JOIN users_customers uc ON t.ID_USER = uc.ID_USER
+    LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    LEFT JOIN ref_topup_type r ON t.ID_TOPUP_TYPE = r.ID_TOPUP_TYPE
+    UNION
+    SELECT
+        CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+        -(p.PRICE * tr.QUANTITY) AS AMOUNT,
+        CONCAT(tr.QUANTITY, 'x', p.NAME) AS LABEL,
+        tr.CREATED_AT,
+        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+    FROM transactions tr
+    JOIN customers c ON tr.ID_CUSTOMER = c.ID_CUSTOMER
+    LEFT JOIN users_customers uc ON tr.ID_USER = uc.ID_USER
+    LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    LEFT JOIN ref_product p ON tr.ID_PRODUCT = p.ID_PRODUCT
+    UNION
+    SELECT
+        ' -Amikale' AS CUSTOMER,
+        -p.AMOUNT,
+        p.COMMENT AS LABEL,
+        p.CREATED_AT,
+        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+    FROM purchases p
+    LEFT JOIN users_customers uc ON p.ID_USER = uc.ID_USER
+    LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    ORDER BY CREATED_AT DESC, CUSTOMER, LABEL;
+
+CREATE OR REPLACE VIEW v_cash_flow AS
+    SELECT
+        CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+        t.AMOUNT AS AMOUNT,
+        r.NAME AS LABEL,
+        t.CREATED_AT,
+        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+    FROM wallet_topup t
+    JOIN customers c ON t.ID_CUSTOMER = c.ID_CUSTOMER
+    LEFT JOIN users_customers uc ON t.ID_USER = uc.ID_USER
+    LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    LEFT JOIN ref_topup_type r ON t.ID_TOPUP_TYPE = r.ID_TOPUP_TYPE
+    WHERE t.ID_TOPUP_TYPE IN (2, 3, 6)
+    UNION
+    SELECT
+        ' -Amikale' AS CUSTOMER,
+        -p.AMOUNT,
+        p.COMMENT AS LABEL,
+        p.CREATED_AT,
+        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+    FROM purchases p
+    LEFT JOIN users_customers uc ON p.ID_USER = uc.ID_USER
+    LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    ORDER BY CREATED_AT DESC, CUSTOMER, LABEL;
