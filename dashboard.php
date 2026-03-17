@@ -207,19 +207,40 @@
         $monthIndex = (int)$row['MONTH_TR'] - 1;
         $loss_cy[$monthIndex] = (int)$row['TOTAL_LOSS'];
     }
+
+    $total_cash = (int)$pdo->query("
+    SELECT (
+        (SELECT SUM(t.AMOUNT) 
+        FROM wallet_topup t 
+        WHERE t.ID_TOPUP_TYPE IN (2, 3, 6)) 
+        - 
+        (SELECT SUM(p.AMOUNT) 
+        FROM purchases p)
+    ) AS total_cash")->fetchColumn() ?: 0;
+
+    $base_target = 6000;
+    if ($total_cash < $base_target) {
+        $target = $base_target;
+    } else {
+        // dynamic target: round up to nearest 1000 + 500
+        $target = (floor($total_cash / 1000) * 1000) + 500;
+    }
+
+    $current_val = $total_cash;
+    $remaining = $target - $total_cash;
+
 ?>
 
 <article id="dashboard">
     <h2 class="major">Dashboard</h2>
+    <canvas id="NeedleGauge" height="300"></canvas>
+    <div style="display: flex; justify-content: space-between; padding: 0 10px; margin-top: -15px; font-weight: bold; font-size: 0.85em; color: #888;">
+        <span>0€</span>
+        <span><?= number_format($target, 0, ',', ' ') ?>€</span>
+    </div>
+    <hr />
     <canvas id="revenueChart" height="300"></canvas>
     <hr />
-    <!-- 
-    <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
-        <div style="width: 300px; height: 300px;">
-            <canvas id="topupDonut"></canvas>
-        </div>
-    </div>
-    <hr /> -->
     <canvas id="lossChart" height="300"></canvas>
     <hr />
     <canvas id="salesChart" height="300"></canvas>
@@ -229,74 +250,107 @@
     <canvas id="topCustomersChart" height="600"></canvas>
     
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    /*
-    const ctx = document.getElementById('topupDonut').getContext('2d');
-    const centerTextPlugin = {
-        id: 'centerText',
-        beforeDraw(chart) {
-            const { ctx, chartArea } = chart;
-            const dataset = chart.data.datasets[0];
+document.addEventListener('DOMContentLoaded', () => {
 
-            if (!dataset || !dataset.data.length) return;
+    const totalCash = <?= $total_cash ?>;
+    const targetGoal = <?= $target ?>;
 
-            const total = dataset.data.reduce((a, b) => a + b, 0);
-
+    const needlePlugin = {
+        id: 'needle',
+        afterDatasetsDraw(chart) {
+            const { ctx, data, chartArea: { width, height } } = chart;
             ctx.save();
-            ctx.font = 'bold 18px sans-serif';
+            
+            const dataValue = <?= $total_cash ?>;
+            const totalValue = <?= $target ?>;
+
+            const angle = Math.PI + (Math.PI * (dataValue / totalValue));
+            
+            const cx = width / 2;
+            const cy = chart.getDatasetMeta(0).data[0].y;
+            const outerRadius = chart.getDatasetMeta(0).data[0].outerRadius;
+
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+
+            // --- Dessin de l'aiguille ---
+            ctx.beginPath();
             ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const x = (chartArea.left + chartArea.right) / 2;
-            const y = (chartArea.top + chartArea.bottom) / 2;
-
-            ctx.fillText(`€${total.toLocaleString()}`, x, y);
+            // Forme de l'aiguille (triangle effilé)
+            ctx.moveTo(0, -5);  // Base haute
+            ctx.lineTo(outerRadius - 20, 0); // Pointe
+            ctx.lineTo(0, 5);   // Base basse
+            ctx.fill();
+            
+            // --- Pivot central (Style horlogerie) ---
+            ctx.beginPath();
+            ctx.arc(0, 0, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            // Petit point noir au centre du pivot
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+            
             ctx.restore();
         }
     };
-    new Chart(ctx, {
+
+    const ctxNeedle = document.getElementById('NeedleGauge').getContext('2d');
+    new Chart(ctxNeedle, {
         type: 'doughnut',
         data: {
-            labels: <?= json_encode(array_column($kpi_0, 'METHOD')) ?>,
+            labels: ['Packing...', 'At the Gate', 'Boarding', 'In the Air'],
             datasets: [{
-                data: <?= json_encode(array_map(fn($r) => (float)$r['REVENUE'], $kpi_0)) ?>,
-                backgroundColor: [
-                    'rgb(33, 59, 112)',
-                    'rgb(254, 230, 54)',
-                    'rgb(255, 255, 255)'
+                // On divise la cible (targetGoal) en 4 zones égales
+                data: [
+                    targetGoal / 4, 
+                    targetGoal / 4, 
+                    targetGoal / 4,
+                    targetGoal / 4
                 ],
-                borderWidth: 1
+                backgroundColor: [
+                    'rgb(255, 95, 109)',  // Rouge corail
+                    'rgb(255, 230, 54)', // Jaune pastel
+                    'rgb(255, 159, 64)',  // Orange vibrant
+                    'rgb(42, 201, 134)'   // Vert émeraude)
+                ],
+                borderWidth: 2,
+                borderColor: '#1a1a1a', // Fine séparation entre les zones
+                circumference: 180,
+                rotation: 270,
+                cutout: '80%'
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            aspectRatio: 1.8,
+            layout: { padding: { bottom: 20 } },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Top-up Revenue by Payment Method – CY'
+                    text: 'Road to IBIZA - <?= round(($total_cash / $target) * 100) ?>% Completed'
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 14 },
+                    displayColors: false,
                     callbacks: {
-                        label: ctx => {
-                            const dataset = ctx.chart.data.datasets[0];
-                            const total = dataset.data.reduce((a, b) => a + b, 0);
-                            const value = ctx.parsed;
-                            const percentage = ((value / total) * 100).toFixed(0);
-                            return `${value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}€ (${percentage}%)`;
+                        label: function() {
+                            return [
+                                ' Balance: ' + totalCash.toLocaleString() + '€',
+                                ' Target: ' + targetGoal.toLocaleString() + '€'
+                            ];
                         }
                     }
-                },
-                legend: {
-                    position: 'top'
                 }
-            },
-            cutout: '60%' // controls donut thickness
+            }
         },
-        plugins: [centerTextPlugin]
+        plugins: [needlePlugin] // L'aiguille pointera sur la valeur de totalCash
     });
-    */
+
     const ctx1 = document.getElementById('salesChart').getContext('2d');
     new Chart(ctx1, {
         type: 'line',
@@ -503,8 +557,8 @@
                 {
                     label: 'Loss <?= date("Y") ?>',
                     data: <?= json_encode($loss_cy) ?>,
-                    borderColor: 'rgb(255, 0, 0)',
-                    backgroundColor: 'rgba(255, 0, 0, 0.25)', // ✅ background
+                    borderColor: 'rgb(255, 95, 109)',
+                    backgroundColor: 'rgba(255, 95, 109, 0.25)', // ✅ background
                     borderWidth: 3,
                     tension: 0.4,
                     fill: true,
@@ -547,7 +601,7 @@
             }
         }
     });
-    });
-    </script>
+});
+</script>
 
 </article>
