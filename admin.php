@@ -37,7 +37,7 @@
                         <td style="text-align:center;">
                             <input type="hidden" name="id_customer" value="<?php echo $ac['ID_CUSTOMER']; ?>">   
                             <button type="submit" name="link_account" style="background:none; box-shadow:none; padding:0; border:0; cursor:pointer;">
-                                <span class="icon solid fa-link" style="color:rgb(125,227,211); font-size: 1rem;" title="Link Account"></span>
+                                <span class="icon solid fa-link" style="color:rgb(42, 201, 134); font-size: 1rem;" title="Link Account"></span>
                             </button>     
                         </td>
                     </form>            
@@ -51,7 +51,7 @@
                                 <input type="hidden" name="id_customer" value="<?php echo $ac['ID_CUSTOMER']; ?>">
                                 <input type="hidden" name="id_user" value="<?php echo $ac['LINKED_USER_ID']; ?>">
                                 <button type="submit" name="unlink_account" style="background:none; box-shadow:none; padding:0; border:0; cursor:pointer;">
-                                    <span class="icon solid fa-unlink" style="color:rgb(227,125,125); font-size: 1rem;" title="Unlink Account"></span>
+                                    <span class="icon solid fa-unlink" style="color:rgb(255, 95, 109); font-size: 1rem;" title="Unlink Account"></span>
                                 </button>
                             </form>
                             <?php if ($isAdmin): ?>
@@ -61,7 +61,7 @@
                                 <button type="submit" name="toggle_admin"
                                         style="background:none; box-shadow:none; border:0; cursor:pointer;">
                                     <span class="icon solid fa-user-minus"
-                                        style="color:rgb(227,125,125); font-size: 1rem;"
+                                        style="color:rgb(255, 95, 109); font-size: 1rem;"
                                         title="Remove Admin"></span>
                                 </button>
                             </form>
@@ -72,7 +72,7 @@
                                 <button type="submit" name="toggle_admin"
                                         style="background:none; box-shadow:none; border:0; cursor:pointer;">
                                     <span class="icon solid fa-user-plus"
-                                        style="color:rgb(125,227,211); font-size: 1rem;"
+                                        style="color:rgb(42, 201, 134); font-size: 1rem;"
                                         title="Make Admin"></span>
                                 </button>
                             </form>

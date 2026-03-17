@@ -12,7 +12,7 @@
     function renderRows($data) {
         foreach ($data as $c): 
             $balance = (float) $c['BALANCE'];
-            $color = $balance >= 0 ? 'rgb(125,227,211)' : 'rgb(227, 125, 125);';
+            $color = $balance >= 0 ? 'rgb(42, 201, 134)' : 'rgb(255, 95, 109)';
             $plus = $balance > 0 ? '+' : '';
             $rowClass = $c['IS_ACTIVE'] == 0 ? 'inactive-row' : '';
             // Create the URL string
@@ -68,13 +68,13 @@
     <div style="display: flex; gap: 20px; margin-bottom: 30px; text-align: center;">
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
             <small>Wallet Credit</small>
-            <div style="font-size: 1.5rem; color: rgb(125,227,211); font-weight: bold;">
+            <div style="font-size: 1.5rem; color: rgb(42,201,134); font-weight: bold;">
                 +<?= number_format($posTotal, 0); ?>€
             </div>
         </div>
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
             <small>Wallet Debt</small>
-            <div style="font-size: 1.5rem; color: rgb(227, 125, 125); font-weight: bold;">
+            <div style="font-size: 1.5rem; color: rgb(255, 95, 109); font-weight: bold;">
                 <?= number_format($negTotal, 0); ?>€
             </div>
         </div>
@@ -86,7 +86,7 @@
     </div>
 
     <div class="table-section">
-        <h3 style="color: rgb(227, 125, 125);">Negative Balances</h3>
+        <h3 style="color: rgb(255, 95, 109);">Negative Balances</h3>
         <div class="table-wrapper">
             <table>
                 <tbody id="negTable">
@@ -99,7 +99,7 @@
     <hr class="table-divider">
 
     <div class="table-section">
-        <h3 style="color: rgb(125, 227, 211);">Positive Balances</h3>
+        <h3 style="color: rgb(42, 201, 134);">Positive Balances</h3>
         <div class="table-wrapper">
             <table>
                 <tbody id="posTable">

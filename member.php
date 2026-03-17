@@ -50,7 +50,7 @@
     }
     // Determine if balance is negative
     $is_negative = $customer['BALANCE'] < 0;
-    $balance_color = $is_negative ? 'rgb(227, 125, 125)' : 'rgb(125, 227, 211)';
+    $balance_color = $is_negative ? 'rgb(255, 95, 109)' : 'rgb(42, 201, 134)';
     $plus = $customer['BALANCE'] > 0 ? '+' : '';
 ?>
 
@@ -86,7 +86,7 @@
                         <?php foreach ($activities as $a): ?>
                             <?php
                                 $is_topup = $a['AMOUNT'] > 0;
-                                $color = $is_topup ? 'rgb(125,227,211)' : 'rgb(227,125,125)';
+                                $color = $is_topup ? 'rgb(42, 201, 134)' : 'rgb(255, 95, 109)';
                                 $sign = $is_topup ? '+' : '';
                             ?>
                             <tr>
@@ -105,7 +105,7 @@
                 <tfoot>
                     <?php
                         $is_positive = $total_activity >= 0;
-                        $total_color = $is_positive ? 'rgb(125,227,211)' : 'rgb(227,125,125)';
+                        $total_color = $is_positive ? 'rgb(42, 201, 134)' : 'rgb(255, 95, 109)';
                         $sign = $total_activity > 0 ? '+' : '';
                     ?>
                     <tr>
