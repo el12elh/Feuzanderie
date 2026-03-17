@@ -33,7 +33,58 @@
     $customers_2 = $pdo->query("SELECT ID_CUSTOMER, FIRST_NAME, LAST_NAME, BALANCE FROM customers WHERE (IS_ACTIVE = 1 OR BALANCE < 0) AND ID_CUSTOMER > 3  ORDER BY FIRST_NAME, LAST_NAME")->fetchAll();
     $products = $pdo->query("SELECT * FROM ref_product WHERE IS_ACTIVE = 1 ORDER BY ID_PRODUCT")->fetchAll();
     $topup_types = $pdo->query("SELECT * FROM ref_topup_type WHERE ID_TOPUP_TYPE != 1 ORDER BY ID_TOPUP_TYPE")->fetchAll();
-    $transactions = $pdo->query("SELECT * FROM v_master_transactions LIMIT 20")->fetchAll();
-    $all_transactions = $pdo->query("SELECT * FROM v_master_transactions")->fetchAll();
-    $cash_flow = $pdo->query("SELECT * FROM v_cash_flow")->fetchAll();
+    $sql = "SELECT
+        CUSTOMER,
+        AMOUNT,
+        LABEL,
+        CREATED_AT,
+        BY_NAME,
+        RECEIPT_PATH
+    FROM (
+        SELECT
+            CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+            t.AMOUNT AS AMOUNT,
+            r.NAME AS LABEL,
+            t.CREATED_AT,
+            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME,
+            NULL AS RECEIPT_PATH
+        FROM wallet_topup t
+        JOIN customers c ON t.ID_CUSTOMER = c.ID_CUSTOMER
+        LEFT JOIN users_customers uc ON t.ID_USER = uc.ID_USER
+        LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+        LEFT JOIN ref_topup_type r ON t.ID_TOPUP_TYPE = r.ID_TOPUP_TYPE
+        UNION ALL
+        SELECT
+            CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME),
+            -(p.PRICE * tr.QUANTITY),
+            CONCAT(tr.QUANTITY, 'x', p.NAME),
+            tr.CREATED_AT,
+            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME),
+            NULL
+        FROM transactions tr
+        JOIN customers c ON tr.ID_CUSTOMER = c.ID_CUSTOMER
+        LEFT JOIN users_customers uc ON tr.ID_USER = uc.ID_USER
+        LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+        LEFT JOIN ref_product p ON tr.ID_PRODUCT = p.ID_PRODUCT
+        UNION ALL
+        SELECT
+            ' -Amikale',
+            -p.AMOUNT,
+            p.COMMENT,
+            p.CREATED_AT,
+            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME),
+            p.RECEIPT_PATH
+        FROM purchases p
+        LEFT JOIN users_customers uc ON p.ID_USER = uc.ID_USER
+        LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
+    ) AS combined
+    ORDER BY CREATED_AT DESC, CUSTOMER, LABEL";
+    // Last 20 transactions
+    $stmt = $pdo->prepare($sql . " LIMIT 20");
+    $stmt->execute();
+    $transactions = $stmt->fetchAll();
+    // All transactions
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $all_transactions = $stmt->fetchAll();
 ?>
