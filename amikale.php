@@ -155,7 +155,7 @@
                         <?php endif; ?>
                         </td>
                         <td>
-                            <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'], 0, ',', ' '); ?>€</span>
+                            <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'], 0, ',', ''); ?>€</span>
                             <br><?= $tr['LABEL']?> 
                         </td>
                         <td><?= date('d/m/y H:i:s', strtotime($tr['CREATED_AT'])) ?></td>
