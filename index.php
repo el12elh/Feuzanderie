@@ -75,6 +75,8 @@
                                 <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
                                 <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
                             <?php else: ?>
+                                <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
+                                <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
                                 <li><a href="#contact"><strong>Contact</strong></a></li>
                             <?php endif; ?>
                             <li><a href="signout"><strong>Sign Out</strong></a></li>
@@ -101,10 +103,9 @@
                         include 'members.php';
                         include 'member.php';
                         include 'admin.php';
+                    endif;
                         include 'cashflow.php';   
                         include 'dashboard.php';
-                    endif;
-
                 endif;
                 ?>
             </div>
