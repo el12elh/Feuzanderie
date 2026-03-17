@@ -126,6 +126,13 @@
             <span class="toast-message"></span>
             <div class="toast-progress"></div>
         </div>
+
+        <!-- Receipt Preview -->
+        <div id="receipt-preview">
+            <div class="close-btn" onclick="closeReceipt(event)"></div>
+            <iframe id="receipt-frame" src=""></iframe>
+        </div>
+
         <!-- BG -->
         <div id="bg"></div>
 

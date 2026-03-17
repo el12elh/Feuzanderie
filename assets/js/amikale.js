@@ -88,3 +88,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+
+function viewReceipt(path) {
+    const frame = document.getElementById('receipt-frame');
+    const preview = document.getElementById('receipt-preview');
+    
+    frame.src = path; // Charge le fichier (PDF ou Image)
+    preview.style.display = 'block'; // Affiche la fenêtre
+}
+
+function closeReceipt(event) {
+    if (event) event.stopPropagation();
+    const preview = document.getElementById('receipt-preview');
+    const frame = document.getElementById('receipt-frame');
+    preview.style.display = 'none';
+    frame.src = '';
+}
