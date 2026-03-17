@@ -22,7 +22,7 @@ $output = fopen('php://output', 'w');
 fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
 // 2. Write the Column Headers
-fputcsv($output, array('Member', 'Details', 'Amount', 'Date', 'By'));
+fputcsv($output, array('Member', 'Details', 'Amount', 'Date', 'By', 'Receipt URL'));
 
 // 3. Write the Data Rows
     foreach ($all_transactions as $tr) {

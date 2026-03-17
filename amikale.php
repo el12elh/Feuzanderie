@@ -139,13 +139,23 @@
                 <tbody>
                 <?php
                 foreach ($transactions as $tr):
-                    $color = $tr['AMOUNT'] > 0 ? 'rgb(125,227,211)' : 'rgb(255, 99, 132)';
+                    $color = $tr['AMOUNT'] > 0 ? 'rgb(42, 201, 134)' : 'rgb(255, 95, 109)';
                     $sign = $tr['AMOUNT'] > 0 ? '+' : '';
                 ?>
                     <tr>
-                        <td><?= $tr['CUSTOMER'] ?></td>
                         <td>
-                            <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'],0); ?>€</span>
+                            <?= $tr['CUSTOMER'] ?>
+                            <?php if (!empty($tr['RECEIPT_PATH'])): ?>
+                            <br>
+                            <a href="javascript:void(0);" 
+                            onclick="viewReceipt('<?= htmlspecialchars($tr['RECEIPT_PATH']) ?>')"
+                            style="font-size: 0.8rem; color: <?= $color ?>; text-decoration: none; border-bottom: 1px dashed <?= $color ?>;">
+                                <i class="fa fa-paperclip"></i> Receipt
+                            </a>
+                        <?php endif; ?>
+                        </td>
+                        <td>
+                            <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'], 0, ',', ' '); ?>€</span>
                             <br><?= $tr['LABEL']?> 
                         </td>
                         <td><?= date('d/m/y H:i:s', strtotime($tr['CREATED_AT'])) ?></td>
