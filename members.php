@@ -24,7 +24,7 @@
                         <?= $c['FIRST_NAME'] . ' ' . $c['LAST_NAME']; ?>
                     </a>
                 </td>
-                <td style="color: <?= $color; ?>;font-weight: bold;"><?= $plus . number_format($balance, 0); ?> €</td>
+                <td style="color: <?= $color; ?>;font-weight: bold;"><?= $plus . number_format($balance, 0); ?>€</td>
                 <td>
                     <form method="post" action="" style="display:inline;">
                         <input type="hidden" name="id_customer" value="<?= $c['ID_CUSTOMER'] ?>">
@@ -69,13 +69,13 @@
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
             <small>Wallet Credit</small>
             <div style="font-size: 1.5rem; color: rgb(125,227,211); font-weight: bold;">
-                +<?= number_format($posTotal, 0); ?> €
+                +<?= number_format($posTotal, 0); ?>€
             </div>
         </div>
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
             <small>Wallet Debt</small>
             <div style="font-size: 1.5rem; color: rgb(227, 125, 125); font-weight: bold;">
-                <?= number_format($negTotal, 0); ?> €
+                <?= number_format($negTotal, 0); ?>€
             </div>
         </div>
     </div>
