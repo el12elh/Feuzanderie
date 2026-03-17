@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new Chart(ctxNeedle, {
         type: 'doughnut',
         data: {
-            labels: ['Packing...', 'At the Gate', 'Boarding', 'In the Air'],
+            labels: ['Packing', 'At the Gate', 'Boarding', 'In the Air ✈'],
             datasets: [{
                 // On divise la cible (targetGoal) en 4 zones égales
                 data: [
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'rgb(42, 201, 134)'   // Vert émeraude)
                 ],
                 borderWidth: 2,
-                borderColor: '#1a1a1a', // Fine séparation entre les zones
+                borderColor: '#1b1f22', // Fine séparation entre les zones
                 circumference: 180,
                 rotation: 270,
                 cutout: '80%'
