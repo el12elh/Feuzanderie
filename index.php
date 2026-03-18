@@ -75,7 +75,6 @@
                                 <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
                                 <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
                             <?php else: ?>
-                                <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
                                 <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
                                 <li><a href="#contact"><strong>Contact</strong></a></li>
                             <?php endif; ?>
@@ -95,6 +94,7 @@
                 // --- LOGGED IN USERS ---
                 else :
                     include 'wallet.php';
+                    include 'dashboard.php';
                     include 'contact.php';
                     // --- ADMINS ONLY ---
                     if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) :        
@@ -103,9 +103,8 @@
                         include 'members.php';
                         include 'member.php';
                         include 'admin.php';
-                    endif;
                         include 'cashflow.php';   
-                        include 'dashboard.php';
+                    endif;
                 endif;
                 ?>
             </div>
