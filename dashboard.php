@@ -216,7 +216,7 @@
         FROM purchases p)
     ) AS total_cash")->fetchColumn() ?: 0;
 
-    $target = 8000;
+    $target = 10000;
     $current_val = $total_cash;
     $remaining = $target - $total_cash;
 
@@ -245,6 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const totalCash = <?= $total_cash ?>;
     const targetGoal = <?= $target ?>;
+    const gaugeLabels = ['Packing', 'At the Gate', 'Boarding', 'In the Air'];
+    const gaugeSegmentCount = gaugeLabels.length;
+    const progressRatio = Math.min(totalCash / targetGoal, 1);
+    const activeNeedleSegment = Math.min(Math.floor(progressRatio * gaugeSegmentCount), gaugeSegmentCount - 1);
+    const formatEuro = (value) => new Intl.NumberFormat('fr-FR').format(value) + '€';
 
     const needlePlugin = {
         id: 'needle',
@@ -292,33 +297,43 @@ document.addEventListener('DOMContentLoaded', () => {
     new Chart(ctxNeedle, {
         type: 'doughnut',
         data: {
-            labels: ['Packing', 'At the Gate', 'Boarding', 'In the Air ✈'],
+            labels: gaugeLabels,
             datasets: [{
-                // On divise la cible (targetGoal) en 4 zones égales
-                data: [
-                    targetGoal / 4, 
-                    targetGoal / 4, 
-                    targetGoal / 4,
-                    targetGoal / 4
-                ],
-                backgroundColor: [
-                    'rgb(255, 95, 109)',  // Rouge corail
-                    'rgb(255, 230, 54)', // Jaune pastel
-                    'rgb(255, 159, 64)',  // Orange vibrant
-                    'rgb(42, 201, 134)'   // Vert émeraude)
-                ],
-                borderWidth: 2,
-                borderColor: '#1b1f22', // Fine séparation entre les zones
+                data: new Array(gaugeSegmentCount).fill(targetGoal / gaugeSegmentCount),
+                backgroundColor: ({ chart }) => {
+                    const { ctx, chartArea } = chart;
+
+                    if (!chartArea) {
+                        return '#ff4d6d';
+                    }
+
+                    const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+                    gradient.addColorStop(0, '#ff4d6d');
+                    gradient.addColorStop(0.25, '#ff9e4f');
+                    gradient.addColorStop(0.5, '#ffd84d');
+                    gradient.addColorStop(0.75, '#8bd450');
+                    gradient.addColorStop(1, '#2ac986');
+
+                    return gradient;
+                },
+                borderWidth: 0,
+                hoverBorderWidth: 0,
+                spacing: 0,
+                hoverOffset: 0,
                 circumference: 180,
                 rotation: 270,
+                radius: '95%',
                 cutout: '80%'
             }]
         },
         options: {
             responsive: true,
-            aspectRatio: 1.8,
+            aspectRatio: 1.6,
             layout: { padding: { bottom: 20 } },
             plugins: {
+                legend: {
+                    display: false
+                },
                 title: {
                     display: true,
                     text: 'Road to IBIZA - <?= round(($total_cash / $target) * 100) ?>% Completed'
@@ -327,12 +342,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     backgroundColor: 'rgba(0, 0, 0, 0.9)',
                     titleFont: { size: 14 },
                     bodyFont: { size: 14 },
+                    bodyAlign: 'right',
                     displayColors: false,
                     callbacks: {
+                        title: function() {
+                            return gaugeLabels[activeNeedleSegment];
+                        },
                         label: function() {
                             return [
-                                ' Balance: ' + totalCash + '€',
-                                ' Target: ' + targetGoal + '€'
+                                '🏦 Balance: ' + formatEuro(totalCash),
+                                '🎯 Target: ' + formatEuro(targetGoal)
                             ];
                         }
                     }
