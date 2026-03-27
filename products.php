@@ -16,7 +16,7 @@
             </div>
 
             <div class="field">
-                <input type="number" name="prod_price" step="0.01" placeholder="Amount (€)" min="1" required />
+                <input type="number" name="prod_price" step="0.01" placeholder="Amount (€)" min="1" max="1000" required />
             </div>
 
             <div class="field">
