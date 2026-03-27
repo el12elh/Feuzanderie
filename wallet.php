@@ -18,7 +18,8 @@ $stmt_activity = $pdo->prepare("
         t.AMOUNT AS AMOUNT,
         r.NAME AS LABEL,
         t.CREATED_AT,
-        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+        a.FIRST_NAME AS BY_FIRST_NAME,
+        a.LAST_NAME AS BY_LAST_NAME
     FROM wallet_topup t
     JOIN customers c ON t.ID_CUSTOMER = c.ID_CUSTOMER
     LEFT JOIN users_customers uc ON t.ID_USER = uc.ID_USER
@@ -33,7 +34,8 @@ $stmt_activity = $pdo->prepare("
         -(p.PRICE * tr.QUANTITY) AS AMOUNT,
         CONCAT(tr.QUANTITY, 'x', p.NAME) AS LABEL,
         tr.CREATED_AT,
-        CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME
+        a.FIRST_NAME AS BY_FIRST_NAME,
+        a.LAST_NAME AS BY_LAST_NAME
     FROM transactions tr
     JOIN customers c ON tr.ID_CUSTOMER = c.ID_CUSTOMER
     LEFT JOIN users_customers uc ON tr.ID_USER = uc.ID_USER
@@ -86,8 +88,8 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
             <table>
                 <thead>
                     <tr>
+                        <th>Member</th>
                         <th>Details</th>
-                        <th>Amount</th>
                         <th>Date</th>
                         <th>By</th>
                     </tr>
@@ -107,14 +109,26 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
                                 $sign = $is_topup ? '+' : '';
                             ?>
                             <tr>
-                                <td>
-                                    <?= htmlspecialchars($a['LABEL']) ?>
+                                <td style="white-space: nowrap;">
+                                    <?= htmlspecialchars($customer['FIRST_NAME']) ?>
+                                    <br><?= htmlspecialchars($customer['LAST_NAME']) ?>
                                 </td>
-                                <td style="color:<?= $color ?>; font-weight:bold;">
-                                    <?= $sign . number_format($a['AMOUNT'], 0) ?>€
+                                <td style="vertical-align: middle;">
+                                    <span style="color:<?= $color ?>; font-weight:bold;">
+                                        <?= $sign . number_format($a['AMOUNT'], 0) ?>€
+                                    </span>
+                                    <br><?= htmlspecialchars($a['LABEL']) ?>
                                 </td>
-                                <td><?= date('d/m/y H:i:s', strtotime($a['CREATED_AT'])) ?></td>
-                                <td><?= htmlspecialchars($a['BY_NAME']) ?></td>
+                                <td style="white-space: nowrap;">
+                                    <?= date('d/m/y', strtotime($a['CREATED_AT'])) ?>
+                                    <br><?= date('H:i:s', strtotime($a['CREATED_AT'])) ?>
+                                </td>
+                                <td style="white-space: nowrap;">
+                                    <?= htmlspecialchars($a['BY_FIRST_NAME'] ?? '') ?>
+                                    <?php if (!empty($a['BY_LAST_NAME'])): ?>
+                                        <br><?= htmlspecialchars($a['BY_LAST_NAME']) ?>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -130,6 +144,8 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
                         <th colspan="1" style="color:<?= $total_color ?>; font-weight:bold;">
                             <?= $sign . number_format($total_activity, 0) ?>€
                         </th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </tfoot>
             </table>
