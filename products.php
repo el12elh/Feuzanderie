@@ -14,13 +14,9 @@
             <div class="field">
                 <input type="text" name="prod_name" placeholder="Beer, Cocktail, etc." required />
             </div>
+
             <div class="field">
-                <select name="prod_price" required>
-                    <option value="">-- Select Amount --</option>
-                    <?php for ($i = 1; $i <= 20; $i++): ?>
-                        <option value="<?= $i ?>"><?= $i . ' €' ?></option>
-                    <?php endfor; ?>
-                </select>
+                <input type="number" name="prod_price" step="0.01" placeholder="Amount (€)" min="1" required />
             </div>
 
             <div class="field">
