@@ -25,9 +25,16 @@ fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 fputcsv($output, array('Member', 'Details', 'Amount', 'Date', 'By', 'Receipt URL'));
 
 // 3. Write the Data Rows
-    foreach ($all_transactions as $tr) {
-        fputcsv($output, $tr);
-    }
+foreach ($all_transactions as $tr) {
+    fputcsv($output, [
+        trim(($tr['FIRST_NAME'] ?? '') . ' ' . ($tr['LAST_NAME'] ?? '')),
+        $tr['LABEL'] ?? '',
+        $tr['AMOUNT'] ?? '',
+        $tr['CREATED_AT'] ?? '',
+        trim(($tr['BY_FIRST_NAME'] ?? '') . ' ' . ($tr['BY_LAST_NAME'] ?? '')),
+        $tr['RECEIPT_PATH'] ?? ''
+    ]);
+}
 
 // Close the stream
 fclose($output);

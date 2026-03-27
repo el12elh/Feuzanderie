@@ -143,8 +143,11 @@
                     $sign = $tr['AMOUNT'] > 0 ? '+' : '';
                 ?>
                     <tr>
-                        <td>
-                            <?= $tr['CUSTOMER'] ?>
+                        <td style="white-space: nowrap;">
+                            <?= htmlspecialchars($tr['FIRST_NAME']) ?>
+                            <?php if (!empty($tr['LAST_NAME'])): ?>
+                                <br><?= htmlspecialchars($tr['LAST_NAME']) ?>
+                            <?php endif; ?>
                             <?php if (!empty($tr['RECEIPT_PATH'])): ?>
                             <br>
                             <a href="javascript:void(0);" 
@@ -158,8 +161,16 @@
                             <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'], 0, ',', ''); ?>€</span>
                             <br><?= $tr['LABEL']?> 
                         </td>
-                        <td><?= date('d/m/y H:i:s', strtotime($tr['CREATED_AT'])) ?></td>
-                        <td><?= $tr['BY_NAME'] ?></td>
+                        <td style="white-space: nowrap;">
+                            <?= date('d/m/y', strtotime($tr['CREATED_AT'])) ?>
+                            <br><?= date('H:i:s', strtotime($tr['CREATED_AT'])) ?>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <?= htmlspecialchars($tr['BY_FIRST_NAME'] ?? '') ?>
+                            <?php if (!empty($tr['BY_LAST_NAME'])): ?>
+                                <br><?= htmlspecialchars($tr['BY_LAST_NAME']) ?>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

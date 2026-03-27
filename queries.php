@@ -34,19 +34,23 @@
     $products = $pdo->query("SELECT * FROM ref_product WHERE IS_ACTIVE = 1 ORDER BY ID_PRODUCT")->fetchAll();
     $topup_types = $pdo->query("SELECT * FROM ref_topup_type WHERE ID_TOPUP_TYPE != 1 ORDER BY ID_TOPUP_TYPE")->fetchAll();
     $sql = "SELECT
-        CUSTOMER,
+        FIRST_NAME,
+        LAST_NAME,
         AMOUNT,
         LABEL,
         CREATED_AT,
-        BY_NAME,
+        BY_FIRST_NAME,
+        BY_LAST_NAME,
         RECEIPT_PATH
     FROM (
         SELECT
-            CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME) AS CUSTOMER,
+            c.FIRST_NAME AS FIRST_NAME,
+            c.LAST_NAME AS LAST_NAME,
             t.AMOUNT AS AMOUNT,
             r.NAME AS LABEL,
             t.CREATED_AT,
-            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME) AS BY_NAME,
+            a.FIRST_NAME AS BY_FIRST_NAME,
+            a.LAST_NAME AS BY_LAST_NAME,
             NULL AS RECEIPT_PATH
         FROM wallet_topup t
         JOIN customers c ON t.ID_CUSTOMER = c.ID_CUSTOMER
@@ -55,11 +59,13 @@
         LEFT JOIN ref_topup_type r ON t.ID_TOPUP_TYPE = r.ID_TOPUP_TYPE
         UNION ALL
         SELECT
-            CONCAT(c.FIRST_NAME, ' ', c.LAST_NAME),
+            c.FIRST_NAME,
+            c.LAST_NAME,
             -(p.PRICE * tr.QUANTITY),
             CONCAT(tr.QUANTITY, 'x', p.NAME),
             tr.CREATED_AT,
-            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME),
+            a.FIRST_NAME,
+            a.LAST_NAME,
             NULL
         FROM transactions tr
         JOIN customers c ON tr.ID_CUSTOMER = c.ID_CUSTOMER
@@ -68,17 +74,19 @@
         LEFT JOIN ref_product p ON tr.ID_PRODUCT = p.ID_PRODUCT
         UNION ALL
         SELECT
-            ' -Amikale',
+            '-Amikale',
+            '',
             -p.AMOUNT,
             p.COMMENT,
             p.CREATED_AT,
-            CONCAT(a.FIRST_NAME, ' ', a.LAST_NAME),
+            a.FIRST_NAME,
+            a.LAST_NAME,
             p.RECEIPT_PATH
         FROM purchases p
         LEFT JOIN users_customers uc ON p.ID_USER = uc.ID_USER
         LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
     ) AS combined
-    ORDER BY CREATED_AT DESC, CUSTOMER, LABEL";
+    ORDER BY CREATED_AT DESC, FIRST_NAME, LAST_NAME, LABEL";
     // Last 20 transactions
     $stmt = $pdo->prepare($sql . " LIMIT 20");
     $stmt->execute();
