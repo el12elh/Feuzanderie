@@ -37,7 +37,7 @@
                 <div class="field">
                     <select name="qty" id="qty" required>
                         <option value="">-- Select Quantity --</option>
-                        <?php for ($i=1; $i<=25; $i++): ?>
+                        <?php for ($i=1; $i<=50; $i++): ?>
                         <option value="<?= $i ?>"><?= $i ?></option>
                         <?php endfor; ?>
                     </select>
