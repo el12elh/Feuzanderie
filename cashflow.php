@@ -94,7 +94,10 @@
                         </span>
                         <br><?= $tr['LABEL'] ?>
                     </td>
-                    <td><?= date('d/m/y H:i:s', strtotime($tr['CREATED_AT'])) ?></td>
+                    <td style="white-space: nowrap;">
+                        <?= date('d/m/y', strtotime($tr['CREATED_AT'])) ?>
+                        <br><?= date('H:i:s', strtotime($tr['CREATED_AT'])) ?>
+                    </td>
                     <td style="white-space: nowrap;">
                         <?= htmlspecialchars($tr['BY_FIRST_NAME'] ?? '') ?>
                         <?php if (!empty($tr['BY_LAST_NAME'])): ?>
@@ -111,7 +114,7 @@
                     $global_sign = $global_total > 0 ? '+' : '';
                 ?>
                 <tr>
-                    <th style="text-align:left;">Global Total</th>
+                    <th style="text-align:left;">Total</th>
                     <th style="color:<?= $global_total_color ?>; font-weight:bold;">
                         <?= $global_sign . number_format($global_total, 0, ',', ' ') ?>€
                     </th>
