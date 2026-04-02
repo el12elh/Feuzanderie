@@ -15,7 +15,8 @@ try {
          PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
          PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
      ]);
-     $pdo->exec("SET time_zone = '+01:00'");
+     $parisOffset = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('P');
+     $pdo->exec("SET time_zone = '{$parisOffset}'");
 } catch (PDOException $e) {
      // This will print the error to the screen so you can debug
      die("Connection failed: " . $e->getMessage());
