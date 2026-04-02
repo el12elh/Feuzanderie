@@ -1,4 +1,12 @@
 <?php
+
+    $linkedCustomerId = null;
+    if (isset($_SESSION['user_id'])) {
+        $stmt_linked_customer = $pdo->prepare("SELECT ID_CUSTOMER FROM users_customers WHERE ID_USER = ?");
+        $stmt_linked_customer->execute([$_SESSION['user_id']]);
+        $linkedCustomerId = $stmt_linked_customer->fetchColumn() ?: null;
+    }
+
     // Fetch products
     $all_prods = $pdo
         ->query("SELECT * FROM ref_product ORDER BY IS_ACTIVE, ID_PRODUCT")

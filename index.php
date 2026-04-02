@@ -73,9 +73,13 @@
                                 <li><a href="#members"><strong>Members</strong></a></li>
                                 <li><a href="#admin"><strong>Admin</strong></a></li>
                                 <li><a href="#cashflow"><strong>Cash Flow</strong></a></li>
-                                <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
+                                <?php if ($linkedCustomerId): ?>
+                                    <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
+                                <?php endif; ?>
                             <?php else: ?>
-                                <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
+                                <?php if ($linkedCustomerId): ?>
+                                    <li><a href="#dashboard"><strong>Dashboard</strong></a></li>
+                                <?php endif; ?>
                                 <li><a href="#contact"><strong>Contact</strong></a></li>
                             <?php endif; ?>
                             <li><a href="signout"><strong>Sign Out</strong></a></li>
@@ -94,7 +98,9 @@
                 // --- LOGGED IN USERS ---
                 else :
                     include 'wallet.php';
-                    include 'dashboard.php';
+                    if ($linkedCustomerId) :
+                        include 'dashboard.php';
+                    endif;
                     include 'contact.php';
                     // --- ADMINS ONLY ---
                     if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) :        
@@ -103,7 +109,7 @@
                         include 'members.php';
                         include 'member.php';
                         include 'admin.php';
-                        include 'cashflow.php';   
+                        include 'cashflow.php';
                     endif;
                 endif;
                 ?>
