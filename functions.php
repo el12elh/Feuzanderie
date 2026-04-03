@@ -247,6 +247,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id_customer = (int)$_POST['id_customer'];
         $stmt = $pdo->prepare("INSERT INTO users_customers VALUES (?, ?)");
         $stmt->execute([$id_user, $id_customer]);
+
+        $stmt = $pdo->prepare("
+            SELECT u.EMAIL, c.FIRST_NAME, c.LAST_NAME
+            FROM users u
+            JOIN customers c ON c.ID_CUSTOMER = ?
+            WHERE u.ID_USER = ?
+        ");
+        $stmt->execute([$id_customer, $id_user]);
+        $linkData = $stmt->fetch();
+
+        if ($linkData && !empty($linkData['EMAIL'])) {
+            $subject = "Your account is now linked";
+            $message = "Hello,\r\n\r\n";
+            $message .= "Your Feuzanderie account is now linked to member profile: ";
+            $message .= trim($linkData['FIRST_NAME'] . ' ' . $linkData['LAST_NAME']) . ".\r\n\r\n";
+            $message .= "You can now access your wallet and dashboard after signing in.\r\n\r\n";
+            $message .= "Cheers,\r\n";
+            $message .= "l'Amikale";
+
+            $headers = "From: FEUZANDERIE <contact@feuzanderie.fr>\r\n";
+            $headers .= "Reply-To: contact@feuzanderie.fr\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion();
+
+            mail($linkData['EMAIL'], $subject, $message, $headers);
+        }
+
         $_SESSION['toast'] = [
             'type' => 'success',
             'message' => 'Account linked successfully'
