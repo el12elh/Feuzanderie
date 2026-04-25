@@ -25,21 +25,22 @@ document.addEventListener('DOMContentLoaded', function () {
             },
         });
 
-        // Listen for changes
-        membersEl.addEventListener('change', function() {
+        function syncMembersPlaceholder() {
             const selectedCount = membersChoices.getValue(true).length;
             const inputField = membersChoices.input.element;
 
             if (selectedCount > 0) {
-                // Remove the placeholder attribute to hide it
-                inputField.placeholder = "";
-                inputField.style.width = "0px";
+                inputField.placeholder = '';
+                inputField.style.width = '0px';
             } else {
-                // Restore it if the list becomes empty
-                inputField.placeholder = "-- Select Members --";
-                inputField.style.width = "auto";
+                inputField.placeholder = '-- Select Members --';
+                inputField.style.width = '100%';
             }
-        });
+        }
+
+        // Fix the initial render and keep it in sync afterward.
+        syncMembersPlaceholder();
+        membersEl.addEventListener('change', syncMembersPlaceholder);
     }
 
     /* ===============================
