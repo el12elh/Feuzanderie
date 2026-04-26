@@ -232,14 +232,13 @@
     <hr />
     <canvas id="revenueChart" height="300"></canvas>
     <hr />
-    <canvas id="lossChart" height="300"></canvas>
-    <hr />
     <canvas id="salesChart" height="300"></canvas>
     <hr />
     <canvas id="CustChart" height="300"></canvas>
     <hr />
     <canvas id="topCustomersChart" height="600"></canvas>
-    
+    <hr />
+    <canvas id="lossChart" height="300"></canvas>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
