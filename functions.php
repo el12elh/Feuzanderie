@@ -326,8 +326,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $qty,
                 $total_price
             ]);
+            // Special customers "Amikale" (ID=1) has no wallet impact
+            if (in_array($id_customer, [1])) {
+                continue; // No wallet impact for "Amikale"
+            }
             // Special customers "Externe"
-            if (in_array($id_customer, [2, 3])) {
+            elseif (in_array($id_customer, [2, 3])) {
                 // Choose topup type
                 $id_type = ($id_customer == 2) ? 3 : 2;
                 $stmt2 = $pdo->prepare("
