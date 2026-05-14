@@ -65,6 +65,11 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
     <?php if (!$link): ?>
         <p>Your account is not yet linked to a customer profile. An administrator will link it shortly.</p>
     <?php else:?>
+    <!-- Toast -->
+    <div class="toast-container toast">
+        <span class="toast-message"></span>
+        <div class="toast-progress"></div>
+    </div>
 
     <div style="text-align: center; margin-bottom: 3rem;">
         <h4><?php echo htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']); ?></h4>
@@ -82,7 +87,30 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
             </p>
         <?php endif; ?>
     </div>
-    
+    <!--
+    <section id="stripe-topup" style="margin-bottom: 2rem;">
+        <form method="post" action="create_stripe_topup">
+            <div class="fields">
+                <div class="field">
+                    <select name="amount" required>
+                        <option value="">-- Select Amount --</option>
+                        <?php for ($i = 1; $i <= 200; $i++): ?>
+                            <option value="<?= $i ?>">+<?= $i ?>€</option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div class="field">
+                    <button type="submit" class="primary fit">
+                        <i class="fa fa-credit-card"></i> Top-up with Stripe*
+                    </button>
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 0.75rem;">
+                * Top-up with Stripe includes a +2% fee.
+            </p>
+        </form>
+    </section>
+    -->
     <h3>Transaction History</h3>
         <div class="table-wrapper">
             <table>
