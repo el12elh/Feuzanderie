@@ -157,7 +157,7 @@
                             </a>
                         <?php endif; ?>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                             <span style="color:<?= $color ?>;font-weight:bold;"><?= $sign . number_format($tr['AMOUNT'], 0, ',', ''); ?>€</span>
                             <br><?= $tr['LABEL']?> 
                         </td>

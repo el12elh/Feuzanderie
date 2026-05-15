@@ -88,7 +88,7 @@
                             </a>
                         <?php endif; ?>
                     </td>
-                    <td style="vertical-align: middle;">
+                    <td style="white-space: nowrap;">
                         <span style="color:<?= $color ?>; font-weight:bold;">
                             <?= $sign . number_format($tr['AMOUNT'], 0, ',', ''); ?>€
                         </span>

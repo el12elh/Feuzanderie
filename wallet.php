@@ -138,7 +138,7 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
                                     <?= htmlspecialchars($customer['FIRST_NAME']) ?>
                                     <br><?= htmlspecialchars($customer['LAST_NAME']) ?>
                                 </td>
-                                <td style="vertical-align: middle;">
+                                <td style="white-space: nowrap;">
                                     <span style="color:<?= $color ?>; font-weight:bold;">
                                         <?= $sign . number_format($a['AMOUNT'], 0) ?>€
                                     </span>

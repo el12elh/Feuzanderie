@@ -57,7 +57,7 @@
                 </div>
                 <div class="content">
                     <div class="inner">
-                        <h1>Feuzanderie🦅</h1>
+                        <h1>Feuzanderie</h1>
                         <p>USJ Amikale</p>
                     </div>
                 </div>
@@ -122,7 +122,7 @@
             <?php include 'toast.php'; ?>
             <!-- Footer -->
             <footer id="footer">
-                <p class="copyright">&copy; <?php echo date('Y'); ?> Feuzanderie<br />
+                <p class="copyright">&copy; <?php echo date('Y'); ?> Feuzanderie🦅<br />
                     &lt;/&gt; with ❤ by 
                 <a href="https://www.linkedin.com/in/el-mehdi-el-haddad/" target="_blank"
                     rel="noreferrer">El Mehdi El Haddad</a></p>
