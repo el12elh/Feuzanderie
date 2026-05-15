@@ -87,7 +87,7 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
             </p>
         <?php endif; ?>
     </div>
-    <!--
+    
     <section id="stripe-topup" style="margin-bottom: 2rem;">
         <form method="post" action="create_stripe_topup">
             <div class="fields">
@@ -101,16 +101,13 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
                 </div>
                 <div class="field">
                     <button type="submit" class="primary fit">
-                        <i class="fa fa-credit-card"></i> Top-up with Stripe*
+                        <i class="fa fa-credit-card"></i> Top-up w/ Stripe
                     </button>
                 </div>
             </div>
-            <p style="font-size: 0.8rem; margin-top: 0.75rem;">
-                * Top-up with Stripe includes a +2% fee.
-            </p>
         </form>
     </section>
-    -->
+    
     <h3>Transaction History</h3>
         <div class="table-wrapper">
             <table>

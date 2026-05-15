@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user_id'])) {
 }
 
 $amount = (int)($_POST['amount'] ?? 0);
-$stripeAmountCents = (int)round($amount * 102);
 
 if ($amount < STRIPE_TOPUP_MIN_EUR || $amount > STRIPE_TOPUP_MAX_EUR) {
     $_SESSION['toast'] = [
@@ -54,10 +53,10 @@ try {
             'price_data' => [
                 'currency' => STRIPE_TOPUP_CURRENCY,
                 'product_data' => [
-                    'name' => 'Feuzanderie wallet top-up',
-                    'description' => trim($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']) . ' - includes 2% Stripe fee',
+                    'name' => 'Wallet Top-Up',
+                    'description' => trim($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']),
                 ],
-                'unit_amount' => $stripeAmountCents,
+                'unit_amount' => $amount * 100,
             ],
             'quantity' => 1,
         ]],
@@ -65,8 +64,6 @@ try {
             'id_user' => (string)$_SESSION['user_id'],
             'id_customer' => (string)$customer['ID_CUSTOMER'],
             'amount_eur' => (string)$amount,
-            'stripe_fee_percent' => '2',
-            'charged_amount_eur' => number_format($stripeAmountCents / 100, 2, '.', ''),
         ],
     ]);
 
