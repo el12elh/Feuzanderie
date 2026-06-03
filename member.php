@@ -60,10 +60,8 @@
     <h2 class="major">Member Profile</h2>
 
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h4>
-            <?= htmlspecialchars($customer['FIRST_NAME']). ' ' . htmlspecialchars($customer['LAST_NAME']) ?>
-        </h4>
-        <h4 style="font-size: 3rem; color: <?php echo $balance_color; ?>; margin-bottom: 0.5rem;">
+        <?php echo htmlspecialchars($customer['FIRST_NAME']). ' ' . htmlspecialchars($customer['LAST_NAME']); ?>    
+        <h4 style="font-size: 2rem; color: <?php echo $balance_color; ?>; margin-bottom: 0.5rem;">
             <?php echo $plus . number_format($customer['BALANCE'], 0); ?>€
         </h4>
     </div>

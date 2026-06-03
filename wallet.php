@@ -72,8 +72,8 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
     </div>
 
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h4><?php echo htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']); ?></h4>
-        <h4 style="font-size: 3rem; color: <?php echo $balance_color; ?>; margin-bottom: 0.5rem;">
+        <?php echo htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']); ?>
+        <h4 style="font-size: 2rem; color: <?php echo $balance_color; ?>; margin-bottom: 0.5rem;">
             <?php echo $plus . number_format($customer['BALANCE'], 0); ?>€
         </h4>
         <?php if ($is_negative): ?>
@@ -87,14 +87,15 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
             </p>
         <?php endif; ?>
     </div>
-    
+
+    <!-- Stripe Top-up Form (Commented out for now, can be enabled when Stripe integration is ready)
     <section id="stripe-topup" style="margin-bottom: 2rem;">
         <form method="post" action="create_stripe_topup">
             <div class="fields">
                 <div class="field">
                     <select name="amount" required>
                         <option value="">-- Select Amount --</option>
-                        <?php for ($i = 1; $i <= 200; $i++): ?>
+                        <?php for ($i = 20; $i <= 200; $i++): ?>
                             <option value="<?= $i ?>">+<?= $i ?>€</option>
                         <?php endfor; ?>
                     </select>
@@ -107,7 +108,8 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
             </div>
         </form>
     </section>
-    
+    -->
+
     <h3>Transaction History</h3>
         <div class="table-wrapper">
             <table>
