@@ -232,6 +232,12 @@
     <hr />
     <canvas id="revenueChart" height="300"></canvas>
     <hr />
+    <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
+        <div style="width: min(100%, 420px); height: 420px;">
+            <canvas id="topupDonut"></canvas>
+        </div>
+    </div>
+    <hr />
     <canvas id="salesChart" height="300"></canvas>
     <hr />
     <canvas id="CustChart" height="300"></canvas>
@@ -580,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Amikale Rounds – CY'
+                    text: '"Tournée de l\'AMIKALE" – CY'
                 },
                 legend: {
                     labels: {
@@ -609,6 +615,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+    });
+    
+    const ctx = document.getElementById('topupDonut').getContext('2d');
+    const centerTextPlugin = {
+        id: 'centerText',
+        beforeDraw(chart) {
+            const { ctx, chartArea } = chart;
+            const dataset = chart.data.datasets[0];
+
+            if (!dataset || !dataset.data.length) return;
+
+            const total = dataset.data.reduce((a, b) => a + b, 0);
+
+            ctx.save();
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const x = (chartArea.left + chartArea.right) / 2;
+            const y = (chartArea.top + chartArea.bottom) / 2;
+
+            ctx.fillText(`€${total.toLocaleString()}`, x, y);
+            ctx.restore();
+        }
+    };
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: <?= json_encode(array_column($kpi_0, 'METHOD')) ?>,
+            datasets: [{
+                data: <?= json_encode(array_map(fn($r) => (float)$r['REVENUE'], $kpi_0)) ?>,
+                backgroundColor: [
+                    'rgb(33, 59, 112)',
+                    'rgb(254, 230, 54)',
+                    'rgb(255, 255, 255)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Top-up Revenue by Payment Method – CY'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const dataset = ctx.chart.data.datasets[0];
+                            const total = dataset.data.reduce((a, b) => a + b, 0);
+                            const value = ctx.parsed;
+                            const percentage = ((value / total) * 100).toFixed(0);
+                            return `${value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}€ (${percentage}%)`;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top'
+                }
+            },
+            cutout: '60%' // controls donut thickness
+        },
+        plugins: [centerTextPlugin]
     });
 });
 </script>
