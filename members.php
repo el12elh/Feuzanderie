@@ -18,7 +18,7 @@
             // Create the URL string
             $memberUrl = "./?id=" . $c['ID_CUSTOMER'] . "#member";
             ?>
-            <tr class="member-row <?= $rowClass ?>" data-name="<?= strtolower($c['FIRST_NAME'] . ' ' . $c['LAST_NAME']); ?>">
+            <tr class="member-row <?= $rowClass ?>" data-name="<?= htmlspecialchars($c['FIRST_NAME'] . ' ' . $c['LAST_NAME'], ENT_QUOTES, 'UTF-8'); ?>">
                 <td>
                     <a href="<?= $memberUrl ?>" style="text-decoration: none; color: inherit; font-weight: 500;">
                         <?= $c['FIRST_NAME'] . ' ' . $c['LAST_NAME']; ?>
@@ -111,8 +111,15 @@
 </article>
 
 <script>
+function normalizeMemberSearch(value) {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
 document.getElementById('memberSearch').addEventListener('keyup', function() {
-    const filter = this.value.toLowerCase();
+    const filter = normalizeMemberSearch(this.value);
     const sections = document.querySelectorAll('.table-section');
     const divider = document.querySelector('.table-divider');
     let visibleSections = 0;
@@ -122,7 +129,7 @@ document.getElementById('memberSearch').addEventListener('keyup', function() {
         let hasMatch = false;
 
         rows.forEach(row => {
-            const name = row.getAttribute('data-name');
+            const name = normalizeMemberSearch(row.getAttribute('data-name'));
             if (name.includes(filter)) {
                 row.style.display = "";
                 hasMatch = true;
