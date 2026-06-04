@@ -26,7 +26,7 @@
                     <?php if (!$isLinked): ?>
                     <form method="post" action="" style="margin:0;">
                         <td>
-                            <?php echo htmlspecialchars($ac['FIRST_NAME'] . " " . $ac['LAST_NAME']); ?><br />
+                            <strong><?php echo htmlspecialchars($ac['FIRST_NAME'] . " " . $ac['LAST_NAME']); ?></strong><br />
                             <select name="id_user" required style="height: 2.5rem; font-size: 0.8rem;">
                                 <option value="">-- Select Email --</option>
                                 <?php foreach ($unlinked_users as $uu): ?>
@@ -43,7 +43,7 @@
                     </form>            
                     <?php else: ?>
                         <td>
-                            <?php echo htmlspecialchars($ac['FIRST_NAME'] . " " . $ac['LAST_NAME']); ?><br />
+                            <strong><?php echo htmlspecialchars($ac['FIRST_NAME'] . " " . $ac['LAST_NAME']); ?></strong><br />
                             <?php echo htmlspecialchars($ac['EMAIL']); ?>
                         </td>
                         <td style="text-align:center;">

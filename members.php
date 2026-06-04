@@ -67,13 +67,13 @@
 
     <div style="display: flex; gap: 20px; margin-bottom: 30px; text-align: center;">
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
-            <small>Wallet Credit</small>
+            <small><strong>Wallet Credit</strong></small>
             <div style="font-size: 1.5rem; color: rgb(42,201,134); font-weight: bold;">
                 +<?= number_format($posTotal, 0); ?>€
             </div>
         </div>
         <div style="flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
-            <small>Wallet Debt</small>
+            <small><strong>Wallet Debt</strong></small>
             <div style="font-size: 1.5rem; color: rgb(255, 95, 109); font-weight: bold;">
                 <?= number_format($negTotal, 0); ?>€
             </div>

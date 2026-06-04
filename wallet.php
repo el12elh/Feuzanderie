@@ -72,7 +72,7 @@ $plus = $customer['BALANCE'] > 0 ? '+' : '';
     </div>
 
     <div style="text-align: center; margin-bottom: 3rem;">
-        <?php echo htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']); ?>
+        <strong><?php echo htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']); ?></strong>
         <h4 style="font-size: 2rem; color: <?php echo $balance_color; ?>; margin-bottom: 0.5rem;">
             <?php echo $plus . number_format($customer['BALANCE'], 0); ?>€
         </h4>
