@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }).join('\n');
 
             const confirmed = window.confirm(
-                '🚨 Alert: This transaction is for a untrusted member and will result in a negative balance after the transaction.\n\n' +
+                '🚨 Alert: This transaction is for a not trusted member and will result in a negative balance after the transaction.\n\n' +
                 memberNames +
                 '\n\nContinue anyway?'
             );
