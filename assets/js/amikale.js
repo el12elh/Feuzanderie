@@ -44,20 +44,50 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* ===============================
-       FORM SUBMIT HANDLER
+       SELL WARNING
        =============================== */
 
-    const form = document.getElementById('searchForm');
+    const sellForm = document.getElementById('sellForm');
+    const productEl = document.getElementById('product');
+    const qtyEl = document.getElementById('qty');
 
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
+    if (sellForm && membersEl && productEl && qtyEl) {
+        sellForm.addEventListener('submit', function (e) {
+            const productOption = productEl.selectedOptions[0];
+            const productPrice = productOption ? parseFloat(productOption.dataset.price || '0') : 0;
+            const quantity = parseInt(qtyEl.value || '0', 10);
+            const total = productPrice * quantity;
 
-            const formData = new FormData(form);
-            const selectedMembers = formData.getAll('id_customer[]');
+            if (!total) {
+                return;
+            }
 
-            // Debug / usage example
-            console.log('Selected members:', selectedMembers);
+            const riskyMembers = Array.from(membersEl.selectedOptions).filter(function (option) {
+                const idCustomer = parseInt(option.value, 10);
+                const balance = parseFloat(option.dataset.balance || '0');
+                const isTrusted = option.dataset.trusted === '1';
+                const balanceAfterTransaction = balance - total;
+
+                return idCustomer > 3 && !isTrusted && balanceAfterTransaction < 0;
+            });
+
+            if (riskyMembers.length === 0) {
+                return;
+            }
+
+            const memberNames = riskyMembers.map(function (option) {
+                return '• ' + option.text.trim();
+            }).join('\n');
+
+            const confirmed = window.confirm(
+                '🚨 Alert: This transaction is for a untrusted member and will result in a negative balance after the transaction.\n\n' +
+                memberNames +
+                '\n\nContinue anyway?'
+            );
+
+            if (!confirmed) {
+                e.preventDefault();
+            }
         });
     }
 

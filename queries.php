@@ -37,7 +37,7 @@
     ")->fetchAll();
 
     // Fetch data for dropdowns and tables
-    $customers_1 = $pdo->query("SELECT ID_CUSTOMER, FIRST_NAME, LAST_NAME, BALANCE FROM customers WHERE IS_ACTIVE = 1 ORDER BY FIRST_NAME, LAST_NAME")->fetchAll();
+    $customers_1 = $pdo->query("SELECT ID_CUSTOMER, FIRST_NAME, LAST_NAME, BALANCE, IS_TRUSTED FROM customers WHERE IS_ACTIVE = 1 ORDER BY FIRST_NAME, LAST_NAME")->fetchAll();
     $customers_2 = $pdo->query("SELECT ID_CUSTOMER, FIRST_NAME, LAST_NAME, BALANCE FROM customers WHERE (IS_ACTIVE = 1 OR BALANCE < 0) AND ID_CUSTOMER > 3  ORDER BY FIRST_NAME, LAST_NAME")->fetchAll();
     $products = $pdo->query("SELECT * FROM ref_product WHERE IS_ACTIVE = 1 ORDER BY ID_PRODUCT")->fetchAll();
     $topup_types = $pdo->query("SELECT * FROM ref_topup_type WHERE ID_TOPUP_TYPE NOT IN (1, 7) ORDER BY ID_TOPUP_TYPE")->fetchAll();

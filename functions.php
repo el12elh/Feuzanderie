@@ -166,10 +166,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_customer'])) {
         $fname   = htmlspecialchars($_POST['first_name'], ENT_QUOTES, 'UTF-8');
         $lname   = htmlspecialchars($_POST['last_name'], ENT_QUOTES, 'UTF-8');
+        $trusted = isset($_POST['is_trusted']) ? 1 : 0;
         
         try {
-            $stmt = $pdo->prepare("INSERT INTO customers (FIRST_NAME, LAST_NAME) VALUES (?, ?)");
-            $stmt->execute([$fname, $lname]);
+            $stmt = $pdo->prepare("INSERT INTO customers (FIRST_NAME, LAST_NAME, IS_TRUSTED) VALUES (?, ?, ?)");
+            $stmt->execute([$fname, $lname, $trusted]);
             $_SESSION['toast'] = [
                 'type' => 'success',
                 'message' => 'Member added successfully'
@@ -192,7 +193,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$new_status, $id_customer]);
         $_SESSION['toast'] = [
             'type' => 'success',
-            'message' => 'Member status updated'
+            'message' => $new_status ? 'Member shown' : 'Member hidden'
+        ];
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    // Toggle customer trust
+    if (isset($_POST['toggle_trust'])) {
+        if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+            exit('Access Denied');
+        }
+
+        $new_status  = (int)$_POST['set_trusted'];
+        $id_customer = (int)$_POST['id_customer'];
+        $stmt = $pdo->prepare("UPDATE customers SET IS_TRUSTED = ? WHERE ID_CUSTOMER = ?");
+        $stmt->execute([$new_status, $id_customer]);
+        $_SESSION['toast'] = [
+            'type' => 'success',
+            'message' => $new_status ? 'Member trusted' : 'Member trust removed'
         ];
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit;

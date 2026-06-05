@@ -36,6 +36,17 @@
                         </button>
                     </form>
                 </td>
+                <td>
+                    <form method="post" action="" style="display:inline;">
+                        <input type="hidden" name="id_customer" value="<?= $c['ID_CUSTOMER'] ?>">
+                        <input type="hidden" name="set_trusted" value="<?= $c['IS_TRUSTED'] == 1 ? 0 : 1 ?>">
+                        <button type="submit" name="toggle_trust"
+                                class="icon solid <?= $c['IS_TRUSTED'] == 1 ? 'fa-user-shield' : 'fa-user-alt-slash' ?>"
+                                title="<?= $c['IS_TRUSTED'] == 1 ? 'Do not trust' : 'Trust' ?>"
+                                style="background:none; box-shadow:none; border:0; cursor:pointer;font-size: 1.2rem; color: <?= $c['IS_TRUSTED'] == 1 ? 'rgb(42, 201, 134)' : 'rgb(255, 95, 109)' ?>;">
+                        </button>
+                    </form>
+                </td>
             </tr>
         <?php endforeach;
     }
@@ -54,6 +65,10 @@
             </div>
             <div class="field">
                 <input type="text" name="last_name" placeholder="Last Name" required />
+            </div>
+            <div class="field">
+                <input type="checkbox" name="is_trusted" id="is_trusted" value="1">
+                <label for="is_trusted" style="margin-left: 8px; cursor: pointer;"><i class="fas fa-user-shield"></i> Trusted</label>
             </div>
             <div class="field">
                 <button type="submit" name="add_customer" class="primary fit">

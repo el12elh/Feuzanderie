@@ -11,14 +11,16 @@
     </div>
     <!-- =================== Sell Product =================== -->
     <section id="sell-product">
-        <form method="post">
+        <form method="post" id="sellForm">
             <div class="fields">
                 <div class="field">
                     <select id="members" name="id_customer[]" multiple required>
                         <?php foreach ($customers_1 as $c): 
                             $plus = $c['BALANCE'] > 0 ? '+' : '';
                         ?>
-                        <option value="<?= $c['ID_CUSTOMER']; ?>">
+                        <option value="<?= $c['ID_CUSTOMER']; ?>"
+                                data-balance="<?= htmlspecialchars($c['BALANCE'], ENT_QUOTES, 'UTF-8'); ?>"
+                                data-trusted="<?= (int)$c['IS_TRUSTED']; ?>">
                             <?= $c['FIRST_NAME'] . ' ' . $c['LAST_NAME'] . " " . $plus . number_format($c['BALANCE'],0); ?>€
                         </option>
                         <?php endforeach; ?>
@@ -28,7 +30,8 @@
                     <select name="id_product" id="product" required>
                         <option value="">-- Select Product --</option>
                         <?php foreach ($products as $p): ?>
-                        <option value="<?= $p['ID_PRODUCT']; ?>">
+                        <option value="<?= $p['ID_PRODUCT']; ?>"
+                                data-price="<?= htmlspecialchars($p['PRICE'], ENT_QUOTES, 'UTF-8'); ?>">
                             <?= $p['NAME'] . " (" . number_format($p['PRICE'],0) . "€)"; ?>
                         </option>
                         <?php endforeach; ?>
