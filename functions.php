@@ -60,9 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message .= "A new account " . $email . " has been registered on Feuzanderie.\r\n\r\n";
                 $message .= "Please link this account to an existing member profile.\r\n\r\n";
                 $message .= "Cheers,\r\n";
-                $message .= "Feuzanderie";
+                $message .= "l'Amikale";
                 
-                $headers = "From: FEUZANDERIE <contact@feuzanderie.fr>\r\n";
+                $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
                 $headers .= "Reply-To: " . $email . "\r\n";
                 $headers .= "X-Mailer: PHP/" . phpversion();
                 
@@ -99,14 +99,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selector = bin2hex(random_bytes(8));
             $token = random_bytes(32);
             $token_hash = password_hash($token, PASSWORD_DEFAULT);
-            $expires = date("Y-m-d H:i:s", strtotime("+1 hour"));
 
             // Delete any existing resets for this user
             $pdo->prepare("DELETE FROM users_pwd_reset WHERE ID_USER = ?")->execute([$user['ID_USER']]);
 
             // Insert new reset request
-            $stmt = $pdo->prepare("INSERT INTO users_pwd_reset (ID_USER, SELECTOR, TOKEN_HASH, EXPIRES_AT) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$user['ID_USER'], $selector, $token_hash, $expires]);
+            $stmt = $pdo->prepare("INSERT INTO users_pwd_reset (ID_USER, SELECTOR, TOKEN_HASH) VALUES (?, ?, ?)");
+            $stmt->execute([$user['ID_USER'], $selector, $token_hash]);
 
             // Use a full URL (absolute path) because relative links (./) don't work in emails
             $baseUrl = "https://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
@@ -122,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message .= "Cheers,\r\n";
             $message .= "l'Amikale";
 
-            $headers = "From: FEUZANDERIE <contact@feuzanderie.fr>\r\n";
+            $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
             $headers .= "Reply-To: contact@feuzanderie.fr\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
 
@@ -304,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message .= "Cheers,\r\n";
             $message .= "l'Amikale";
 
-            $headers = "From: FEUZANDERIE <contact@feuzanderie.fr>\r\n";
+            $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
             $headers .= "Reply-To: contact@feuzanderie.fr\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
 
