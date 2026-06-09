@@ -50,6 +50,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("INSERT INTO users (EMAIL, PASSWORD, IS_ADMIN) 
                                        VALUES (?, ?, ?)");
                 $stmt->execute([$email, $hashed_pass, $isAdmin]);
+                
+                // Send notification email to contact@feuzanderie.fr
+                $baseUrl = "https://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
+                $accountLink = $baseUrl . "/#signin";
+                
+                $subject = "New Account Registration - Feuzanderie";
+                $message = "Hello,\r\n\r\n";
+                $message .= "A new account " . $email . " has been registered on Feuzanderie.\r\n\r\n";
+                $message .= "Please link this account to an existing member profile.\r\n\r\n";
+                $message .= "Cheers,\r\n";
+                $message .= "Feuzanderie";
+                
+                $headers = "From: FEUZANDERIE <contact@feuzanderie.fr>\r\n";
+                $headers .= "Reply-To: " . $email . "\r\n";
+                $headers .= "X-Mailer: PHP/" . phpversion();
+                
+                // Send the notification email
+                mail("contact@feuzanderie.fr", $subject, $message, $headers);
+                
                 $_SESSION['toast'] = [
                     'type' => 'success',
                     'message' => 'Account created successfully'
