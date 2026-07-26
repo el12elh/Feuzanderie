@@ -62,8 +62,5 @@ Security notes
 Contributing
 - Fork, make changes and submit a pull request. For quick fixes open an issue describing the problem.
 
-License
-This project does not include a license file. Add an appropriate license (e.g., MIT) if you intend to publish.
-
 Contact
 For questions or support, open an issue or contact the repository owner.
