@@ -94,9 +94,10 @@
         LEFT JOIN users_customers uc ON p.ID_USER = uc.ID_USER
         LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
     ) AS combined
+    WHERE CREATED_AT >= NOW() - INTERVAL 1 DAY
     ORDER BY CREATED_AT DESC, FIRST_NAME, LAST_NAME, LABEL";
-    // Last 20 transactions
-    $stmt = $pdo->prepare($sql . " LIMIT 20");
+    // Last 24h transactions
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $transactions = $stmt->fetchAll();
     // All transactions
