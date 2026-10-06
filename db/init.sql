@@ -60,7 +60,7 @@ INSERT INTO `ref_topup_type` (`NAME`) VALUES
     ('Cash'),
     ('SumUp'),
     ('Refund'),
-    ('Bank Transfer'),
+    ('Transfer'),
     ('Stripe');
 
 CREATE TABLE IF NOT EXISTS `ref_product` (

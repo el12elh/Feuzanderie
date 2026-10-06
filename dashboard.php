@@ -10,7 +10,7 @@
  * CONFIG
  * ------------------------------------------------------------------ */
 $TARGET            = 10000;            // "Road to Malta" goal, in €
-$TOPUP_INCOME      = [2, 3, 6, 7];     // Cash, SumUp, Bank Transfer, Stripe
+$TOPUP_INCOME      = [2, 3, 6, 7];     // Cash, SumUp, Transfer, Stripe
 $TOPUP_REFUND      = 5;                // wallet_topup type used for refunds
 $INTERNAL_CUSTOMER = 1;                // "Tournée de l'AMIKALE" account
 $MEMBER_AFTER_ID   = 3;                // customers with ID > 3 are real members
@@ -18,8 +18,8 @@ $EXCLUDED_PRODUCTS = [7, 9];           // left out of the top-members ranking
 $STAGES            = ['Packing', 'At the Gate', 'Boarding', 'In the Air'];
 
 // Manual corrections to net sales, keyed 'YYYY-MM'.
-// (Replaces the old hardcoded "+700 on January 2026" in the middle of the code.)
-$SALES_ADJUSTMENTS = ['2026-01' => 700];
+// (Replaces the old hardcoded "+1400 on January 2026" in the middle of the code.)
+$SALES_ADJUSTMENTS = ['2026-01' => 1400];
 
 /* ------------------------------------------------------------------
  * HELPERS
@@ -153,6 +153,29 @@ $weekdayRows = $fetch("
     WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 89 DAY) AND id_customer != ?
     GROUP BY WEEKDAY(created_at)
 ", [$INTERNAL_CUSTOMER]);
+
+// Daily data for the week-by-week views (this year and last year, so any ISO week can be picked)
+$weeklyFrom = $prevStart;
+$weeklyTo   = $today->modify('+1 day')->format('Y-m-d');
+$methodList = array_column($fetch("
+    SELECT NAME FROM ref_topup_type
+    WHERE ID_TOPUP_TYPE IN ($incomeIn)
+    ORDER BY ID_TOPUP_TYPE
+"), 'NAME');
+$dailyTopupRows = $fetch("
+    SELECT DATE(wt.CREATED_AT) AS DAY_TUP, rtt.NAME AS METHOD, SUM(wt.AMOUNT) AS REVENUE
+    FROM wallet_topup wt
+    JOIN ref_topup_type rtt ON wt.ID_TOPUP_TYPE = rtt.ID_TOPUP_TYPE
+    WHERE wt.ID_TOPUP_TYPE IN ($incomeIn)
+      AND wt.CREATED_AT >= ? AND wt.CREATED_AT < ?
+    GROUP BY DATE(wt.CREATED_AT), rtt.ID_TOPUP_TYPE, rtt.NAME
+", [$weeklyFrom, $weeklyTo]);
+$dailySalesRows = $fetch("
+    SELECT DATE(created_at) AS DAY_TR, SUM(total) AS SALES
+    FROM transactions
+    WHERE created_at >= ? AND created_at < ? AND id_customer != ?
+    GROUP BY DATE(created_at)
+", [$weeklyFrom, $weeklyTo, $INTERNAL_CUSTOMER]);
 
 // Cash on hand: all income minus all purchases
 $cashRow    = $fetch("
@@ -312,6 +335,12 @@ $topValues = array_map(fn($r) => round((float) $r['NET_VALUE'], 2), $topRows);
 $weekdayValues = array_fill(0, 7, 0.0);
 foreach ($weekdayRows as $r) $weekdayValues[(int) $r['DOW']] = round((float) $r['SALES'], 2);
 
+// Week-by-week views: { 'YYYY-MM-DD': { method: amount } } and { 'YYYY-MM-DD': amount }
+$dailyTopups = [];
+foreach ($dailyTopupRows as $r) $dailyTopups[$r['DAY_TUP']][$r['METHOD']] = round((float) $r['REVENUE'], 2);
+$dailySales = [];
+foreach ($dailySalesRows as $r) $dailySales[$r['DAY_TR']] = round((float) $r['SALES'], 2);
+
 $payload = [
     'year'     => $year,
     'prevYear' => $prevYear,
@@ -333,6 +362,13 @@ $payload = [
     'cumSales'   => ['cy' => $cumSalesCY, 'py' => $cumSalesPY],
     'members'    => ['cy' => $membersCY, 'py' => $membersPY],
     'weekdays'   => $weekdayValues,
+    'weekly'     => [
+        'today'   => $today->format('Y-m-d'),
+        'from'    => $weeklyFrom,
+        'methods' => $methodList,
+        'topups'  => $dailyTopups,
+        'sales'   => $dailySales,
+    ],
     'topups7'    => ['labels' => $weekLabels, 'datasets' => $weekDatasets],
     'methods'    => ['labels' => $methodLabels, 'values' => $methodValues],
     'top'        => ['labels' => $topLabels, 'values' => $topValues],
@@ -392,6 +428,14 @@ $deltaPill = function (?float $d) use ($h): string {
     #dashboard .db-card h3 { margin: 0; font-size: 1rem; letter-spacing: normal; text-transform: none; }
     #dashboard .db-card p.db-desc { margin: .2rem 0 .9rem; color: var(--db-muted); font-size: .82rem; line-height: 1.4; }
     #dashboard .db-chart { position: relative; height: 17.5rem; }
+    /* Week picker */
+    #dashboard .db-weeknav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+    #dashboard .db-weeknav select { flex: 1 1 13rem; width: auto; min-width: 0; height: 2.2rem; padding: 0 2.5rem 0 .75rem; font-size: .85rem; background-size: 1rem; background-position: calc(100% - .75rem) center; }
+    #dashboard select option { color: #1b1f22; background: #fff; }
+    #dashboard .db-btn { height: 2.2rem; line-height: 2.2rem; padding: 0 .85rem; font-size: .85rem; letter-spacing: normal; text-transform: none; cursor: pointer; }
+    #dashboard .db-btn:disabled { opacity: .35; cursor: default; }
+    #dashboard .db-weeksum { margin: 0 0 .75rem; font-size: .9rem; font-variant-numeric: tabular-nums; }
+    #dashboard .db-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     #dashboard .db-empty { margin: 0; padding: 2rem 0; color: var(--db-muted); text-align: center; }
 </style>
 
@@ -448,6 +492,34 @@ $deltaPill = function (?float $d) use ($h): string {
             <h3>Cash flow, last 12 months</h3>
             <p class="db-desc">Top-ups in, purchases out, and the running balance over the period.</p>
             <div class="db-chart"><canvas id="cashflowChart" role="img" aria-label="Monthly income, expenses and cumulative balance, last 12 months"></canvas></div>
+        </section>
+
+        <section class="db-card">
+            <h3>Top-ups per week</h3>
+            <p class="db-desc">By payment method, Monday to Sunday. Use the arrows or the list to pick a week.</p>
+            <div class="db-weeknav" data-weekpicker="topups">
+                <button type="button" class="db-btn" data-act="prev" aria-label="Previous week">&#8249;</button>
+                <label class="db-sr" for="topupsWeek">Week</label>
+                <select id="topupsWeek"></select>
+                <button type="button" class="db-btn" data-act="next" aria-label="Next week">&#8250;</button>
+                <button type="button" class="db-btn" data-act="today">This week</button>
+            </div>
+            <p class="db-weeksum" id="topupsSummary" aria-live="polite"></p>
+            <div class="db-chart"><canvas id="weeklyTopupsChart" role="img" aria-label="Top-ups by payment method for each day of the selected week"></canvas></div>
+        </section>
+
+        <section class="db-card">
+            <h3>Sales per weekday</h3>
+            <p class="db-desc">Each day of the selected week, next to the week before.</p>
+            <div class="db-weeknav" data-weekpicker="sales">
+                <button type="button" class="db-btn" data-act="prev" aria-label="Previous week">&#8249;</button>
+                <label class="db-sr" for="salesWeek">Week</label>
+                <select id="salesWeek"></select>
+                <button type="button" class="db-btn" data-act="next" aria-label="Next week">&#8250;</button>
+                <button type="button" class="db-btn" data-act="today">This week</button>
+            </div>
+            <p class="db-weeksum" id="salesSummary" aria-live="polite"></p>
+            <div class="db-chart"><canvas id="weeklySalesChart" role="img" aria-label="Sales for each day of the selected week compared with the previous week"></canvas></div>
         </section>
 
         <section class="db-card">
@@ -523,7 +595,7 @@ $deltaPill = function (?float $d) use ($h): string {
 
         /* ---------- shared look ---------- */
         const C = { blue: '#6c93e8', yellow: '#fee636', green: '#2ac986', red: '#ff5f6d', white: '#ffffff', purple: '#8f87ff'};
-        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Bank Transfer': C.white, 'Stripe': C.purple };
+        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Transfer': C.white, 'Stripe': C.purple };
         const FALLBACK = 'rgb(200, 200, 200)';
         const fontFamily = getComputedStyle(document.body).fontFamily;
 
@@ -702,6 +774,144 @@ $deltaPill = function (?float $d) use ($h): string {
                 plugins: { legend: { display: false }, tooltip: tooltipEuro('y') },
                 scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: eur } } }
             }
+        });
+
+        /* ---------- week-by-week views with a week picker ---------- */
+        const W = D.weekly;
+        const DAY_MS = 86400000;
+        const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const parseDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+        const isoDay = d => d.toISOString().slice(0, 10);
+        const addDays = (d, n) => new Date(d.getTime() + n * DAY_MS);
+        const mondayOf = d => addDays(d, -((d.getUTCDay() + 6) % 7));
+        const isoWeekNumber = monday => {
+            const thursday = addDays(monday, 3);                       // ISO: the week belongs to the year of its Thursday
+            const jan1 = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 1));
+            return Math.ceil(((thursday - jan1) / DAY_MS + 1) / 7);
+        };
+        const shortDate = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+        const weekDays = monday => Array.from({ length: 7 }, (_, i) => isoDay(addDays(parseDay(monday), i)));
+        const dayLabels = days => days.map((d, i) => `${WEEKDAYS[i]} ${parseDay(d).getUTCDate()}`);
+        const sumOf = list => list.reduce((s, v) => s + (v || 0), 0);
+
+        // Mondays from the current week back to the start of the data, newest first
+        const weekMondays = [];
+        for (let m = mondayOf(parseDay(W.today)), first = mondayOf(parseDay(W.from)); m >= first; m = addDays(m, -7)) {
+            weekMondays.push(isoDay(m));
+        }
+
+        const weekPicker = (key, onChange) => {
+            const root = document.querySelector(`[data-weekpicker="${key}"]`);
+            if (!root) return;
+            const select = root.querySelector('select');
+            const prev = root.querySelector('[data-act="prev"]');
+            const next = root.querySelector('[data-act="next"]');
+            select.innerHTML = weekMondays.map(mon => {
+                const start = parseDay(mon), end = addDays(start, 6);
+                return `<option value="${mon}">Week ${isoWeekNumber(start)}, ${shortDate(start)} – ${shortDate(end)} ${end.getUTCFullYear()}</option>`;
+            }).join('');
+            const show = mon => {
+                select.value = mon;
+                const i = weekMondays.indexOf(mon);
+                prev.disabled = i === weekMondays.length - 1;          // list is newest first
+                next.disabled = i === 0;
+                onChange(mon);
+            };
+            const step = delta => {
+                const target = weekMondays[weekMondays.indexOf(select.value) + delta];
+                if (target) show(target);
+            };
+            prev.addEventListener('click', () => step(1));
+            next.addEventListener('click', () => step(-1));
+            root.querySelector('[data-act="today"]').addEventListener('click', () => show(weekMondays[0]));
+            select.addEventListener('change', () => show(select.value));
+            show(weekMondays[0]);
+        };
+
+        // Top-ups per payment method, Monday to Sunday
+        const weeklyTopups = make('weeklyTopupsChart', {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: W.methods.map(m => ({ label: m, backgroundColor: METHOD_COLORS[m] ?? FALLBACK, data: [] }))
+            },
+            options: {
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: c => `${c.dataset.label}: ${eur(c.parsed.y)}`,
+                            footer: items => `Day total: ${eur(sumOf(items.map(i => i.parsed.y)))}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, beginAtZero: true, ticks: { callback: eur } }
+                }
+            }
+        });
+        weekPicker('topups', mon => {
+            if (!weeklyTopups) return;
+            const days = weekDays(mon);
+            weeklyTopups.data.labels = dayLabels(days);
+            let total = 0;
+            const parts = [];
+            weeklyTopups.data.datasets.forEach(ds => {
+                ds.data = days.map(d => d > W.today ? null : ((W.topups[d] || {})[ds.label] || 0));
+                const sum = sumOf(ds.data);
+                total += sum;
+                if (sum > 0) parts.push(`${ds.label} ${eur(sum)}`);
+            });
+            weeklyTopups.update();
+            el('topupsSummary').textContent = total > 0
+                ? `Week total ${eur(total)}: ${parts.join(', ')}.`
+                : 'No top-ups recorded this week.';
+        });
+
+        // Sales per weekday, selected week against the week before
+        const weeklySales = make('weeklySalesChart', {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Selected week', backgroundColor: C.blue, data: [] },
+                    { label: 'Previous week', backgroundColor: 'rgba(254, 230, 54, .55)', data: [] }
+                ]
+            },
+            options: {
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'bottom' }, tooltip: tooltipEuro('y') },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: eur } } }
+            }
+        });
+        weekPicker('sales', mon => {
+            if (!weeklySales) return;
+            const monday = parseDay(mon);
+            const days = weekDays(mon);
+            const prevDays = weekDays(isoDay(addDays(monday, -7)));
+            const weekNo = isoWeekNumber(monday), prevNo = isoWeekNumber(addDays(monday, -7));
+            const sales = d => d > W.today ? null : (W.sales[d] ?? 0);
+
+            weeklySales.data.labels = dayLabels(days);
+            weeklySales.data.datasets[0].label = `Week ${weekNo}`;
+            weeklySales.data.datasets[0].data = days.map(sales);
+            weeklySales.data.datasets[1].label = `Week ${prevNo}`;
+            weeklySales.data.datasets[1].data = prevDays.map(d => W.sales[d] ?? 0);
+            weeklySales.update();
+
+            // Compare like with like: for the running week, only the days that have happened
+            const elapsed = days.filter(d => d <= W.today).length;
+            const cur = sumOf(weeklySales.data.datasets[0].data);
+            const before = sumOf(weeklySales.data.datasets[1].data.slice(0, elapsed));
+            let text = elapsed === 0 ? 'This week has not started yet.' : `Week ${weekNo}: ${eur(cur)}.`;
+            if (elapsed > 0 && before > 0) {
+                const pct = Math.round((cur / before - 1) * 100);
+                const cls = pct >= 0 ? 'up' : 'down';
+                text += ` <span class="db-delta ${cls}">${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct)}%</span> vs ${elapsed === 7 ? '' : 'the same days of '}week ${prevNo}.`;
+            }
+            el('salesSummary').innerHTML = text;
         });
 
         /* ---------- recent top-ups (stacked) ---------- */
