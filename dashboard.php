@@ -10,11 +10,12 @@
  * CONFIG
  * ------------------------------------------------------------------ */
 $TARGET            = 10000;            // "Road to Malta" goal, in €
-$TOPUP_INCOME      = [2, 3, 6, 7];     // Cash, SumUp, Transfer, Stripe
+$TOPUP_INCOME      = [1, 2, 3, 4];     // Cash, SumUp, Stripe, Transfer
 $TOPUP_REFUND      = 5;                // wallet_topup type used for refunds
 $INTERNAL_CUSTOMER = 1;                // "Tournée de l'AMIKALE" account
 $MEMBER_AFTER_ID   = 3;                // customers with ID > 3 are real members
 $EXCLUDED_PRODUCTS = [7, 9];           // left out of the top-members ranking
+$SEASON_START_MONTH = 8;                // seasons run August to July
 $STAGES            = ['Packing', 'At the Gate', 'Boarding', 'In the Air'];
 
 // Manual corrections to net sales, keyed 'YYYY-MM'.
@@ -184,6 +185,23 @@ $cashRow    = $fetch("
 ");
 $totalCash = round((float) ($cashRow[0]['TOTAL_CASH'] ?? 0), 2);
 
+// Monthly income and expenses over the whole history (for the season averages)
+$historyRows = $fetch("
+    SELECT YEAR_TR, MONTH_TR, SUM(INCOME) AS INCOME, SUM(EXPENSES) AS EXPENSES
+    FROM (
+        SELECT YEAR(CREATED_AT) AS YEAR_TR, MONTH(CREATED_AT) AS MONTH_TR,
+               SUM(AMOUNT) AS INCOME, 0 AS EXPENSES
+        FROM wallet_topup
+        WHERE ID_TOPUP_TYPE IN ($incomeIn)
+        GROUP BY YEAR(CREATED_AT), MONTH(CREATED_AT)
+        UNION ALL
+        SELECT YEAR(CREATED_AT), MONTH(CREATED_AT), 0, SUM(AMOUNT)
+        FROM purchases
+        GROUP BY YEAR(CREATED_AT), MONTH(CREATED_AT)
+    ) AS monthly_history
+    GROUP BY YEAR_TR, MONTH_TR
+");
+
 // Rolling 12-month cash flow
 $cfStart    = (new DateTimeImmutable('first day of this month'))->modify('-11 months');
 $cfStartStr = $cfStart->format('Y-m-d');
@@ -283,6 +301,38 @@ for ($i = 0; $i < 12; $i++) {
     $cfCumulative[$i] = $running;
 }
 
+// Average monthly net per season: net result of the complete months divided by their number.
+// The running month is left out, and a season that has just started only counts what has elapsed.
+$monthIdx = fn(int $y, int $m): int => $y * 12 + ($m - 1);
+$netByIdx = [];
+foreach ($historyRows as $r) {
+    $netByIdx[$monthIdx((int) $r['YEAR_TR'], (int) $r['MONTH_TR'])] = (float) $r['INCOME'] - (float) $r['EXPENSES'];
+}
+$seasons = [];
+if ($netByIdx) {
+    $firstIdx = min(array_keys($netByIdx));
+    $lastIdx  = $monthIdx($year, $curMonth) - 1;                 // last complete month
+    $offset   = $SEASON_START_MONTH - 1;
+    for ($y = intdiv($firstIdx - $offset, 12); $y <= intdiv($lastIdx - $offset, 12); $y++) {
+        $seasonFrom = $y * 12 + $offset;
+        $from   = max($seasonFrom, $firstIdx);                   // a first season may start late
+        $to     = min($seasonFrom + 11, $lastIdx);
+        $months = $to - $from + 1;
+        if ($months < 1) continue;
+        $sum = 0.0;
+        for ($i = $from; $i <= $to; $i++) $sum += $netByIdx[$i] ?? 0;
+        $seasons[] = [
+            'label'  => sprintf('%d/%02d', $y, ($y + 1) % 100),
+            'avg'    => round($sum / $months, 2),
+            'months' => $months,
+            'open'   => $to < $seasonFrom + 11,                  // season still running
+        ];
+    }
+    $seasons = array_slice($seasons, -6);                        // the last six seasons
+}
+$seasonNow  = $seasons ? $seasons[count($seasons) - 1] : null;
+$seasonPrev = count($seasons) > 1 ? $seasons[count($seasons) - 2] : null;
+
 // Pace and projection: average net of the 3 complete months before this one
 $avg3      = ($cfNet[8] + $cfNet[9] + $cfNet[10]) / 3;
 $remaining = max($TARGET - $totalCash, 0);
@@ -362,6 +412,12 @@ $payload = [
     'cumSales'   => ['cy' => $cumSalesCY, 'py' => $cumSalesPY],
     'members'    => ['cy' => $membersCY, 'py' => $membersPY],
     'weekdays'   => $weekdayValues,
+    'seasons'    => [
+        'labels' => array_column($seasons, 'label'),
+        'values' => array_column($seasons, 'avg'),
+        'months' => array_column($seasons, 'months'),
+        'open'   => array_column($seasons, 'open'),
+    ],
     'weekly'     => [
         'today'   => $today->format('Y-m-d'),
         'from'    => $weeklyFrom,
@@ -430,12 +486,18 @@ $deltaPill = function (?float $d) use ($h): string {
     #dashboard .db-chart { position: relative; height: 17.5rem; }
     /* Week picker */
     #dashboard .db-weeknav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .6rem; }
-    #dashboard .db-weeknav select { flex: 1 1 13rem; width: auto; min-width: 0; height: 2.2rem; padding: 0 2.5rem 0 .75rem; font-size: .85rem; background-size: 1rem; background-position: calc(100% - .75rem) center; }
+    #dashboard .db-weeknav select { flex: 1 1 8.5rem; width: auto; min-width: 0; height: 2.2rem; padding: 0 2.5rem 0 .75rem; font-size: .85rem; background-size: 1rem; background-position: calc(100% - .75rem) center; }
     #dashboard select option { color: #1b1f22; background: #fff; }
     #dashboard .db-btn { height: 2.2rem; line-height: 2.2rem; padding: 0 .85rem; font-size: .85rem; letter-spacing: normal; text-transform: none; cursor: pointer; }
     #dashboard .db-btn:disabled { opacity: .35; cursor: default; }
     #dashboard .db-weeksum { margin: 0 0 .75rem; font-size: .9rem; font-variant-numeric: tabular-nums; }
     #dashboard .db-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (max-width: 480px) {
+        #dashboard .db-card { padding: .9rem .9rem 1rem; }
+        #dashboard .db-weeknav { gap: .35rem; }
+        #dashboard .db-weeknav .db-btn { padding: 0 .65rem; }
+        #dashboard .db-weeknav select { padding-left: .5rem; padding-right: 2rem; background-position: calc(100% - .5rem) center; }
+    }
     #dashboard .db-empty { margin: 0; padding: 2rem 0; color: var(--db-muted); text-align: center; }
 </style>
 
@@ -482,8 +544,19 @@ $deltaPill = function (?float $d) use ($h): string {
         </div>
         <div class="db-kpi">
             <dt>Average monthly net</dt>
-            <dd class="db-value"><?= $eur($avg3) ?></dd>
-            <dd class="db-sub">Last three complete months</dd>
+            <?php if ($seasonNow): ?>
+                <dd class="db-value"><?= $eur($seasonNow['avg']) ?></dd>
+                <dd class="db-sub">
+                    Season <?= $h($seasonNow['label']) ?>,
+                    <?= (int) $seasonNow['months'] ?> complete month<?= $seasonNow['months'] > 1 ? 's' : '' ?><?= $seasonNow['open'] ? ' so far' : '' ?>
+                </dd>
+                <?php if ($seasonPrev): ?>
+                    <dd class="db-sub"><?= $h($seasonPrev['label']) ?>: <?= $eur($seasonPrev['avg']) ?></dd>
+                <?php endif; ?>
+            <?php else: ?>
+                <dd class="db-value">–</dd>
+                <dd class="db-sub">Not enough data yet</dd>
+            <?php endif; ?>
         </div>
     </dl>
 
@@ -502,7 +575,7 @@ $deltaPill = function (?float $d) use ($h): string {
                 <label class="db-sr" for="topupsWeek">Week</label>
                 <select id="topupsWeek"></select>
                 <button type="button" class="db-btn" data-act="next" aria-label="Next week">&#8250;</button>
-                <button type="button" class="db-btn" data-act="today">This week</button>
+                <button type="button" class="db-btn" data-act="today">Today</button>
             </div>
             <p class="db-weeksum" id="topupsSummary" aria-live="polite"></p>
             <div class="db-chart"><canvas id="weeklyTopupsChart" role="img" aria-label="Top-ups by payment method for each day of the selected week"></canvas></div>
@@ -516,7 +589,7 @@ $deltaPill = function (?float $d) use ($h): string {
                 <label class="db-sr" for="salesWeek">Week</label>
                 <select id="salesWeek"></select>
                 <button type="button" class="db-btn" data-act="next" aria-label="Next week">&#8250;</button>
-                <button type="button" class="db-btn" data-act="today">This week</button>
+                <button type="button" class="db-btn" data-act="today">Today</button>
             </div>
             <p class="db-weeksum" id="salesSummary" aria-live="polite"></p>
             <div class="db-chart"><canvas id="weeklySalesChart" role="img" aria-label="Sales for each day of the selected week compared with the previous week"></canvas></div>
@@ -576,10 +649,20 @@ $deltaPill = function (?float $d) use ($h): string {
             <?php endif; ?>
         </section>
 
-        <section class="db-card db-wide">
+        <section class="db-card">
             <h3>Tournée de l'Amikale</h3>
             <p class="db-desc">Monthly total booked to the Amikale account, shown as a loss.</p>
             <div class="db-chart"><canvas id="lossChart" role="img" aria-label="Monthly Amikale loss this year"></canvas></div>
+        </section>
+
+        <section class="db-card">
+            <h3>Average monthly net per season</h3>
+            <p class="db-desc">Top-ups minus purchases, divided by the complete months of each season (August to July). Lighter bar: season in progress.</p>
+            <?php if ($seasons): ?>
+                <div class="db-chart"><canvas id="seasonChart" role="img" aria-label="Average monthly net for each season"></canvas></div>
+            <?php else: ?>
+                <p class="db-empty">Not enough history yet.</p>
+            <?php endif; ?>
         </section>
     </div>
 
@@ -790,6 +873,13 @@ $deltaPill = function (?float $d) use ($h): string {
             return Math.ceil(((thursday - jan1) / DAY_MS + 1) / 7);
         };
         const shortDate = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+        // Compact label for the picker (fits a phone): 26W41, 5/10 - 11/10
+        const dayMonth = d => `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
+        const weekLabel = mon => {
+            const start = parseDay(mon);
+            const code = String(addDays(start, 3).getUTCFullYear()).slice(-2) + 'W' + String(isoWeekNumber(start)).padStart(2, '0');
+            return `${code}, ${dayMonth(start)} - ${dayMonth(addDays(start, 6))}`;
+        };
         const weekDays = monday => Array.from({ length: 7 }, (_, i) => isoDay(addDays(parseDay(monday), i)));
         const dayLabels = days => days.map((d, i) => `${WEEKDAYS[i]} ${parseDay(d).getUTCDate()}`);
         const sumOf = list => list.reduce((s, v) => s + (v || 0), 0);
@@ -806,10 +896,7 @@ $deltaPill = function (?float $d) use ($h): string {
             const select = root.querySelector('select');
             const prev = root.querySelector('[data-act="prev"]');
             const next = root.querySelector('[data-act="next"]');
-            select.innerHTML = weekMondays.map(mon => {
-                const start = parseDay(mon), end = addDays(start, 6);
-                return `<option value="${mon}">Week ${isoWeekNumber(start)}, ${shortDate(start)} – ${shortDate(end)} ${end.getUTCFullYear()}</option>`;
-            }).join('');
+            select.innerHTML = weekMondays.map(mon => `<option value="${mon}">${weekLabel(mon)}</option>`).join('');
             const show = mon => {
                 select.value = mon;
                 const i = weekMondays.indexOf(mon);
@@ -973,6 +1060,33 @@ $deltaPill = function (?float $d) use ($h): string {
                 }
             },
             plugins: [centerText]
+        });
+
+        /* ---------- average monthly net per season ---------- */
+        make('seasonChart', {
+            type: 'bar',
+            data: {
+                labels: D.seasons.labels,
+                datasets: [{
+                    label: 'Average monthly net',
+                    data: D.seasons.values,
+                    backgroundColor: D.seasons.values.map((v, i) => (v < 0 ? C.red : C.blue) + (D.seasons.open[i] ? '88' : ''))
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: c => [
+                                `${eur(c.parsed.y)} a month`,
+                                `${D.seasons.months[c.dataIndex]} complete months${D.seasons.open[c.dataIndex] ? ', season in progress' : ''}`
+                            ]
+                        }
+                    }
+                },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: eur } } }
+            }
         });
 
         /* ---------- top members ---------- */
