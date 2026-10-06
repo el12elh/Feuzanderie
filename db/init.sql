@@ -59,9 +59,9 @@ INSERT INTO `ref_topup_type` (`NAME`) VALUES
     ('Initial'),
     ('Cash'),
     ('SumUp'),
-    ('Refund'),
+    ('Stripe'),
     ('Transfer'),
-    ('Stripe');
+    ('Refund');
 
 CREATE TABLE IF NOT EXISTS `ref_product` (
     `ID_PRODUCT` INT UNSIGNED NOT NULL AUTO_INCREMENT,
