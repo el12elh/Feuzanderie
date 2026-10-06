@@ -4,7 +4,7 @@
     if ($page < 1) $page = 1;
     $offset = ($page - 1) * $limit;
     $total_rows = $pdo->query("SELECT (
-        (SELECT COUNT(*) FROM wallet_topup WHERE ID_TOPUP_TYPE IN (2, 3, 6)) 
+        (SELECT COUNT(*) FROM wallet_topup WHERE ID_TOPUP_TYPE IN (2, 3, 6, 7))
         + 
         (SELECT COUNT(*) FROM purchases)
     ) AS total_transactions")->fetchColumn();
@@ -12,7 +12,7 @@
     $global_total = (int)$pdo->query("SELECT (
         (SELECT COALESCE(SUM(t.AMOUNT), 0)
         FROM wallet_topup t
-        WHERE t.ID_TOPUP_TYPE IN (2, 3, 6))
+        WHERE t.ID_TOPUP_TYPE IN (2, 3, 6, 7))
         -
         (SELECT COALESCE(SUM(p.AMOUNT), 0)
         FROM purchases p)
@@ -32,7 +32,7 @@
     LEFT JOIN users_customers uc ON t.ID_USER = uc.ID_USER
     LEFT JOIN customers a ON uc.ID_CUSTOMER = a.ID_CUSTOMER
     LEFT JOIN ref_topup_type r ON t.ID_TOPUP_TYPE = r.ID_TOPUP_TYPE
-    WHERE t.ID_TOPUP_TYPE IN (2, 3, 6)
+    WHERE t.ID_TOPUP_TYPE IN (2, 3, 6, 7)
     UNION
     SELECT
         '-Amikale' AS FIRST_NAME,

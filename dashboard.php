@@ -10,11 +10,10 @@
  * CONFIG
  * ------------------------------------------------------------------ */
 $TARGET            = 10000;            // "Road to Malta" goal, in €
-$TOPUP_INCOME      = [2, 3, 6];        // Cash, SumUp, Bank Transfer
+$TOPUP_INCOME      = [2, 3, 6, 7];     // Cash, SumUp, Bank Transfer, Stripe
 $TOPUP_REFUND      = 5;                // wallet_topup type used for refunds
 $INTERNAL_CUSTOMER = 1;                // "Tournée de l'AMIKALE" account
 $MEMBER_AFTER_ID   = 3;                // customers with ID > 3 are real members
-$EXCLUDED_PRODUCTS = [7, 9];           // left out of the top-members ranking
 $STAGES            = ['Packing', 'At the Gate', 'Boarding', 'In the Air'];
 
 // Manual corrections to net sales, keyed 'YYYY-MM'.
@@ -113,7 +112,6 @@ $weekRows = $fetch("
 ");
 
 // Top 20 members by net spend, current year
-$excludedClause = $EXCLUDED_PRODUCTS ? 'AND tr.ID_PRODUCT NOT IN (' . $ids($EXCLUDED_PRODUCTS) . ')' : '';
 $topRows = $fetch("
     SELECT sub.CUSTOMER, (sub.TOTAL_ORDER_VALUE - COALESCE(ref.TOTAL_REFUND, 0)) AS NET_VALUE
     FROM (
@@ -125,7 +123,6 @@ $topRows = $fetch("
         LEFT JOIN ref_product p ON tr.ID_PRODUCT = p.ID_PRODUCT
         WHERE tr.CREATED_AT >= ? AND tr.CREATED_AT < ?
           AND c.ID_CUSTOMER > ?
-          $excludedClause
         GROUP BY c.ID_CUSTOMER, c.FIRST_NAME, c.LAST_NAME
     ) sub
     LEFT JOIN (
@@ -522,8 +519,8 @@ $deltaPill = function (?float $d) use ($h): string {
         }
 
         /* ---------- shared look ---------- */
-        const C = { blue: '#6c93e8', yellow: '#fee636', green: '#2ac986', red: '#ff5f6d', white: '#ffffff' };
-        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Bank Transfer': C.white };
+        const C = { blue: '#6c93e8', yellow: '#fee636', green: '#2ac986', red: '#ff5f6d', white: '#ffffff', purple: '#8f87ff'};
+        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Stripe': C.purple, 'Bank Transfer': C.white};
         const FALLBACK = 'rgb(200, 200, 200)';
         const fontFamily = getComputedStyle(document.body).fontFamily;
 
