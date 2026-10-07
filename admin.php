@@ -1,14 +1,6 @@
 <?php
 include 'security.php';
 
-if (!function_exists('member_initials')) {
-    function member_initials($first, $last) {
-        $a = mb_substr(trim((string)$first), 0, 1);
-        $b = mb_substr(trim((string)$last), 0, 1);
-        return htmlspecialchars(mb_strtoupper($a . $b));
-    }
-}
-
 // Split members: waiting for an account link / already linked
 $to_link = [];
 $linked  = [];

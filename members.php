@@ -1,15 +1,6 @@
 <?php
 include 'security.php';
 
-if (!function_exists('eur')) {
-    // 12 -> "12€", 12.5 -> "12.50€" (no thousands separator)
-    function eur($v, $signed = false) {
-        $dec  = (abs($v - round($v)) > 0.001) ? 2 : 0;
-        $sign = ($signed && $v > 0) ? '+' : '';
-        return $sign . number_format($v, $dec, '.', '') . '€';
-    }
-}
-
 // Split customers into two arrays
 $positives = array_filter($customers, fn($c) => $c['BALANCE'] >= 0);
 $negatives = array_filter($customers, fn($c) => $c['BALANCE'] < 0);

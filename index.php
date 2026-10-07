@@ -2,6 +2,7 @@
     include 'db.php';
     include 'functions.php';
     include 'queries.php';
+    include 'helpers.php';
 ?>
 
 <!DOCTYPE HTML>
