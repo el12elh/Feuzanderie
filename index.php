@@ -7,9 +7,12 @@
 <!DOCTYPE HTML>
 <html lang="en">
     <head>
-        <title>Feuzanderie</title>
+        <title>Feuzanderie | USJ Amikale</title>
         <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+        <meta name="description" content="Feuzanderie, the USJ Amikale wallet: check your balance, top up and follow your purchases."/>
+        <meta name="theme-color" content="#1b1f22"/>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
         <link rel="stylesheet" href="assets/css/main.css"/>
         <noscript>
             <link rel="stylesheet" href="assets/css/noscript.css"/>
@@ -52,7 +55,9 @@
             
             <!-- Header -->
             <header id="header">
-                <div class="logo" onclick="location.reload();" style="cursor: pointer;">
+                <div class="logo" role="button" tabindex="0" aria-label="Reload Feuzanderie"
+                     onclick="location.reload();" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); location.reload(); }"
+                     style="cursor: pointer;">
                     <img src="images/logo.png" alt="Logo">
                 </div>
                 <div class="content">
@@ -61,7 +66,7 @@
                         <p>USJ Amikale</p>
                     </div>
                 </div>
-                <nav>
+                <nav aria-label="Main">
                     <ul>
                         <?php if (!isset($_SESSION['user_id'])): ?>
                             <li><a href="#signin"><strong>Sign In</strong></a></li>
