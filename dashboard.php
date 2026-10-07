@@ -9,7 +9,7 @@
 /* ------------------------------------------------------------------
  * CONFIG
  * ------------------------------------------------------------------ */
-$TARGET            = 10000;            // "Road to Malta" goal, in €
+$TARGET            = 10000;            // "Road to Ibiza 🇪🇸" goal, in €
 $TOPUP_INCOME      = [1, 2, 3, 4];     // Cash, SumUp, Stripe, Transfer
 $TOPUP_REFUND      = 5;                // wallet_topup type used for refunds
 $INTERNAL_CUSTOMER = 1;                // "Tournée de l'AMIKALE" account
@@ -332,21 +332,23 @@ if ($netByIdx) {
 }
 $seasonNow  = $seasons ? $seasons[count($seasons) - 1] : null;
 $seasonPrev = count($seasons) > 1 ? $seasons[count($seasons) - 2] : null;
-
-// Pace and projection: average net of the 3 complete months before this one
-$avg3      = ($cfNet[8] + $cfNet[9] + $cfNet[10]) / 3;
-$remaining = max($TARGET - $totalCash, 0);
-$progress  = $TARGET > 0 ? $totalCash / $TARGET : 0;
-$stageIdx  = max(0, min((int) floor($progress * count($STAGES)), count($STAGES) - 1));
+// Pace and projection: average monthly net of the complete months of the current season (August to July)
+$seasonPace = ($seasonNow && $seasonNow['open']) ? (float) $seasonNow['avg'] : null;
+$remaining  = max($TARGET - $totalCash, 0);
+$progress   = $TARGET > 0 ? $totalCash / $TARGET : 0;
+$stageIdx   = max(0, min((int) floor($progress * count($STAGES)), count($STAGES) - 1));
 if ($remaining <= 0) {
     $etaText = 'Target reached.';
-} elseif ($avg3 > 0) {
-    $monthsLeft = (int) ceil($remaining / $avg3);
+} elseif ($seasonPace === null) {
+    $etaText = 'The season has just started and has no complete month yet, so no date can be projected.';
+} elseif ($seasonPace > 0) {
+    $monthsLeft = (int) ceil($remaining / $seasonPace);
     $etaDate    = $today->modify('first day of this month')->modify("+$monthsLeft months");
-    $etaText    = 'At the pace of the last three months (' . $eur($avg3) . ' a month), the target lands around '
-                . $etaDate->format('F Y') . '.';
+    $etaText    = 'At the average pace of season ' . $seasonNow['label'] . ' (' . $eur($seasonPace) . ' a month over '
+                . (int) $seasonNow['months'] . ' complete month' . ($seasonNow['months'] > 1 ? 's' : '')
+                . '), the target lands around ' . $etaDate->format('F Y') . '.';
 } else {
-    $etaText = 'The balance did not grow over the last three months, so no date can be projected.';
+    $etaText = 'The balance did not grow on average this season, so no date can be projected.';
 }
 
 // Top-ups, last 7 active days (stacked by method)
@@ -506,7 +508,7 @@ $deltaPill = function (?float $d) use ($h): string {
 
     <section class="db-hero" aria-labelledby="db-road">
         <div>
-            <h3 id="db-road">Road to Malta</h3>
+            <h3 id="db-road">Road to Ibiza 🇪🇸</h3>
             <p class="db-balance"><?= $eur($totalCash) ?></p>
             <p class="db-muted">
                 <?= round($progress * 100) ?>% of the <?= $eur($TARGET) ?> target.
@@ -547,15 +549,8 @@ $deltaPill = function (?float $d) use ($h): string {
             <?php if ($seasonNow): ?>
                 <dd class="db-value"><?= $eur($seasonNow['avg']) ?></dd>
                 <dd class="db-sub">
-                    Season <?= $h($seasonNow['label']) ?>,
-                    <?= (int) $seasonNow['months'] ?> complete month<?= $seasonNow['months'] > 1 ? 's' : '' ?><?= $seasonNow['open'] ? ' so far' : '' ?>
+                    Season <?= $h($seasonNow['label']) ?>
                 </dd>
-                <?php if ($seasonPrev): ?>
-                    <dd class="db-sub"><?= $h($seasonPrev['label']) ?>: <?= $eur($seasonPrev['avg']) ?></dd>
-                <?php endif; ?>
-            <?php else: ?>
-                <dd class="db-value">–</dd>
-                <dd class="db-sub">Not enough data yet</dd>
             <?php endif; ?>
         </div>
     </dl>
@@ -613,20 +608,6 @@ $deltaPill = function (?float $d) use ($h): string {
             <div class="db-chart"><canvas id="membersChart" role="img" aria-label="Active members per month, current year versus previous year"></canvas></div>
         </section>
 
-        <section class="db-card">
-            <h3>Sales by weekday</h3>
-            <p class="db-desc">Last 90 days. The busiest day is highlighted.</p>
-            <div class="db-chart"><canvas id="weekdayChart" role="img" aria-label="Sales by day of the week over the last 90 days"></canvas></div>
-        </section>
-
-        <section class="db-card">
-            <h3>Recent top-ups</h3>
-            <p class="db-desc">By payment method, on the last 7 days with activity.</p>
-            <?php if ($weekLabels): ?>
-                <div class="db-chart"><canvas id="recentTopupsChart" role="img" aria-label="Top-ups by payment method, last 7 active days"></canvas></div>
-            <?php else: ?>
-                <p class="db-empty">No top-ups recorded yet.</p>
-            <?php endif; ?>
         </section>
 
         <section class="db-card">
@@ -649,21 +630,12 @@ $deltaPill = function (?float $d) use ($h): string {
             <?php endif; ?>
         </section>
 
-        <section class="db-card">
+        <section class="db-card db-wide">
             <h3>Tournée de l'Amikale</h3>
             <p class="db-desc">Monthly total booked to the Amikale account, shown as a loss.</p>
             <div class="db-chart"><canvas id="lossChart" role="img" aria-label="Monthly Amikale loss this year"></canvas></div>
         </section>
 
-        <section class="db-card">
-            <h3>Average monthly net per season</h3>
-            <p class="db-desc">Top-ups minus purchases, divided by the complete months of each season (August to July). Lighter bar: season in progress.</p>
-            <?php if ($seasons): ?>
-                <div class="db-chart"><canvas id="seasonChart" role="img" aria-label="Average monthly net for each season"></canvas></div>
-            <?php else: ?>
-                <p class="db-empty">Not enough history yet.</p>
-            <?php endif; ?>
-        </section>
     </div>
 
 <script>
