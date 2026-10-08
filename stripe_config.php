@@ -1,8 +1,8 @@
 <?php
 
-const STRIPE_TOPUP_TYPE_ID = 7; // ID_TOPUP_TYPE for Stripe in ref_topup_type
+const STRIPE_TOPUP_TYPE_ID = 3; // ID_TOPUP_TYPE for Stripe in ref_topup_type
 const STRIPE_TOPUP_CURRENCY = 'eur';
-const STRIPE_TOPUP_MIN_EUR = 1;
+const STRIPE_TOPUP_MIN_EUR = 25;
 const STRIPE_TOPUP_MAX_EUR = 200;
 
 $localStripeConfig = __DIR__ . '/stripe_config.local.php';
