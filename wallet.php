@@ -92,6 +92,13 @@ $net          = $total_in + $total_out;
         #wallet .w-tag { display: inline-block; margin-left: .5rem; padding: .05rem .5rem; border: 1px solid var(--line); border-radius: 1rem;
             font-size: .72rem; font-weight: 400; vertical-align: middle; }
         #wallet .w-tag.trusted { color: var(--ok); border-color: var(--ok); }
+        #wallet .w-tag.trusted .icon { font-size: .72rem; line-height: 1; vertical-align: middle; }
+
+        /* Active member perks */
+        #wallet .w-perks { display: flex; align-items: flex-start; gap: .85rem; margin: 0 0 1.25rem; padding: 1rem 1.25rem;
+            border: 1px solid var(--ok); border-radius: .75rem; background: rgba(42,201,134,.08); }
+        #wallet .w-perks .icon { color: var(--ok); margin-top: .15rem; }
+        #wallet .w-perks p { margin: 0; font-size: .92rem; line-height: 1.45; }
 
         /* Stats */
         #wallet .w-stats { display: flex; gap: 2rem; }
@@ -149,7 +156,7 @@ $net          = $total_in + $total_out;
     <section class="w-balance <?= $state_class ?>">
         <div>
             <p class="w-name"><?= htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']) ?>
-                <?php if ($is_trusted): ?><span class="w-tag trusted" title="Can go below zero when buying">Trusted</span><?php endif; ?></p>
+                <?php if ($is_trusted): ?><span class="w-tag trusted" title="Can go below zero when buying" aria-label="Active member"><span class="icon solid fa-star" aria-hidden="true"></span></span><?php endif; ?></p>
             <h4 class="w-amount num"><?= eur($balance, true) ?></h4>
             <?php if ($is_negative): ?>
                 <p class="w-status"><span class="icon solid fa-exclamation-triangle"></span> Please top up your account ASAP</p>
@@ -162,6 +169,14 @@ $net          = $total_in + $total_out;
             <div class="w-stat"><span>Spent</span><strong class="out num"><?= eur($total_out) ?></strong></div>
         </div>
     </section>
+    
+    <?php if ($is_trusted): ?>
+    <!-- Active member message -->
+    <aside class="w-perks">
+        <span class="icon solid fa-star" aria-hidden="true"></span>
+        <p>As an active member, you benefit from a negative balance of up to €20, the right to join the end-of-season trip, and a range of exclusive benefits.</p>
+    </aside>
+    <?php endif; ?>
 
     <!-- Top-up -->
     <section id="stripe-topup" class="w-topup">

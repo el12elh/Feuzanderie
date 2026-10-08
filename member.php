@@ -124,7 +124,7 @@ $net          = $total_in + $total_out;
     <section class="w-balance <?= $state_class ?>">
         <div>
             <p class="w-name"><?= htmlspecialchars($customer['FIRST_NAME'] . ' ' . $customer['LAST_NAME']) ?>
-                <?php if ($is_trusted): ?><span class="w-tag trusted">Trusted</span><?php endif; ?></p>
+                <?php if ($is_trusted): ?><span class="w-tag trusted" title="Can go below zero when buying" aria-label="Active member"><span class="icon solid fa-star" aria-hidden="true"></span></span><?php endif; ?></p>
             <h4 class="w-amount num"><?= eur($balance, true) ?></h4>
             <?php if ($is_negative): ?>
                 <p class="w-status"><span class="icon solid fa-exclamation-triangle"></span> Negative balance</p>

@@ -135,7 +135,7 @@ if (!function_exists('renderRows')) {
                 </div>
                 <div class="field">
                     <input type="checkbox" name="is_trusted" id="is_trusted" value="1">
-                    <label for="is_trusted" style="cursor: pointer;"><i class="fas fa-user-shield"></i> Trusted</label>
+                    <label for="is_trusted" style="cursor: pointer;"><i class="fas fa-user-shield"></i> Trusted Member</label>
                 </div>
                 <div class="field">
                     <button type="submit" name="add_customer" class="primary fit">

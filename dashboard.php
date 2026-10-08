@@ -72,7 +72,7 @@ $methodRows = $fetch("
     ORDER BY rtt.ID_TOPUP_TYPE
 ", [$yearStart, $yearEnd]);
 
-// Net sales + active members, previous and current year (full calendar years,
+// Net sales + active customers, previous and current year (full calendar years,
 // so the year-over-year comparison is complete)
 $salesRows = $fetch("
     WITH sales AS (
@@ -535,7 +535,7 @@ $deltaPill = function (?float $d) use ($h): string {
             </dd>
         </div>
         <div class="db-kpi">
-            <dt>Active members this month</dt>
+            <dt>Active customers this month</dt>
             <dd class="db-value"><?= (int) $membersNow ?></dd>
             <dd class="db-sub">Last month: <?= (int) $membersPrev ?></dd>
         </div>
@@ -603,9 +603,9 @@ $deltaPill = function (?float $d) use ($h): string {
         </section>
 
         <section class="db-card">
-            <h3>Active members</h3>
-            <p class="db-desc">Members with at least one purchase in the month.</p>
-            <div class="db-chart"><canvas id="membersChart" role="img" aria-label="Active members per month, current year versus previous year"></canvas></div>
+            <h3>Active customers</h3>
+            <p class="db-desc">Customers with at least one purchase in the month.</p>
+            <div class="db-chart"><canvas id="membersChart" role="img" aria-label="Active customers per month, current year versus previous year"></canvas></div>
         </section>
 
         </section>
