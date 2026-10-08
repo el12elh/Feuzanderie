@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
                 $headers .= "Reply-To: " . $email . "\r\n";
+                $headers .= "Bcc: contact@feuzanderie.fr\r\n";
                 $headers .= "X-Mailer: PHP/" . phpversion();
                 
                 // Send the notification email
@@ -123,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
             $headers .= "Reply-To: contact@feuzanderie.fr\r\n";
+            $headers .= "Bcc: contact@feuzanderie.fr\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
 
             // Send the mail
@@ -305,6 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $headers = "From: Feuzanderie <contact@feuzanderie.fr>\r\n";
             $headers .= "Reply-To: contact@feuzanderie.fr\r\n";
+            $headers .= "Bcc: contact@feuzanderie.fr\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
 
             mail($linkData['EMAIL'], $subject, $message, $headers);
@@ -527,6 +530,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Headers (Important for deliverability)
         $headers = "From: $email\r\n";
         $headers .= "Reply-To: $email\r\n";
+        $headers .= "Bcc: contact@feuzanderie.fr\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n"; // Force l'UTF-8
         $headers .= "X-Mailer: PHP/" . phpversion();
