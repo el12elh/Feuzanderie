@@ -8,7 +8,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
     <head>
-        <title>Feuzanderie | USJ Amikale</title>
+        <title>Feuzanderie</title>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
         <meta name="description" content="Feuzanderie, the USJ Amikale wallet: check your balance, top up and follow your purchases."/>
