@@ -649,8 +649,8 @@ $deltaPill = function (?float $d) use ($h): string {
         }
 
         /* ---------- shared look ---------- */
-        const C = { blue: '#6c93e8', yellow: '#fee636', green: '#2ac986', red: '#ff5f6d', white: '#ffffff', purple: '#8f87ff'};
-        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Transfer': C.white, 'Stripe': C.purple };
+        const C = { blue: '#6c93e8', yellow: '#fee636', green: '#2ac986', red: '#ff5f6d', white: '#ffffff', purple: '#e879a9'};
+        const METHOD_COLORS = { 'Cash': C.blue, 'SumUp': C.yellow, 'Stripe': C.purple, 'Transfer': C.white, };
         const FALLBACK = 'rgb(200, 200, 200)';
         const fontFamily = getComputedStyle(document.body).fontFamily;
 
